@@ -1,0 +1,3272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>九九乘法口诀消消乐</title>
+  <style>
+    :root {
+      --primary: #388e3c;
+      --secondary: #4caf50;
+      --accent: #66bb6a;
+      --success: #2e7d32;
+      --warning: #f57c00;
+      --danger: #d32f2f;
+      --info: #1976d2;
+      --light: #e8f5e8;
+      --dark: #2d3436;
+      --white: #ffffff;
+      --shadow: rgba(56, 142, 60, 0.15);
+      --card-bg: rgba(255, 255, 255, 0.95);
+      --game-bg: linear-gradient(135deg, #66bb6a 0%, #4caf50 100%);
+      --wood-dark: #5d4037;
+      --wood-medium: #6d4c41;
+      --wood-light: #8d6e63;
+      --wood-highlight: #a1887f;
+      --wood-shadow: rgba(93, 64, 55, 0.55);
+      --wood-grain: #4e342e;
+      --mahjong-face: #f3fff3;
+      --mahjong-top: #d9f1d9;
+      --mahjong-right: #b8e0b8;
+      --mahjong-shadow: rgba(0, 0, 0, 0.18);
+      --modal-mask: rgba(0, 0, 0, 0.62);
+      --border-soft: rgba(56, 142, 60, 0.16);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+      background: var(--game-bg);
+      min-height: 100vh;
+      color: var(--dark);
+      overflow: hidden;
+      user-select: none;
+    }
+
+    .game-container {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      padding: 10px;
+    }
+
+    .game-header {
+      position: relative;
+      background: var(--card-bg);
+      border-radius: 16px;
+      padding: 14px 18px;
+      box-shadow: 0 4px 16px var(--shadow);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+      gap: 12px;
+      z-index: 3301;
+    }
+
+    .game-title {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      color: var(--primary);
+      font-size: 1.8em;
+      font-weight: 800;
+      min-width: 0;
+    }
+
+    .game-title-text {
+      white-space: nowrap;
+    }
+
+    .expression-count-selector {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.6em;
+      font-weight: 600;
+      color: var(--dark);
+      white-space: nowrap;
+      background: rgba(255, 255, 255, 0.8);
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 2px solid var(--primary);
+    }
+
+    .expression-count-selector.hidden {
+      display: none !important;
+    }
+
+    .count-select,
+    .modal-select,
+    .student-name-input,
+    .roster-textarea {
+      padding: 6px 10px;
+      font-size: 1em;
+      font-weight: 600;
+      border: 2px solid var(--primary);
+      border-radius: 8px;
+      background: var(--white);
+      color: var(--dark);
+      transition: all 0.3s ease;
+    }
+
+    .count-select {
+      cursor: pointer;
+      min-width: 70px;
+    }
+
+    .count-select:hover,
+    .modal-select:hover,
+    .student-name-input:hover,
+    .roster-textarea:hover {
+      border-color: var(--secondary);
+      box-shadow: 0 2px 8px rgba(56, 142, 60, 0.12);
+    }
+
+    .count-select:focus,
+    .modal-select:focus,
+    .student-name-input:focus,
+    .roster-textarea:focus {
+      outline: none;
+      border-color: var(--secondary);
+      box-shadow: 0 0 0 3px rgba(56, 142, 60, 0.1);
+    }
+
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .header-tools {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      min-width: 0;
+    }
+
+    .tool-buttons {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .tool-buttons.hidden-control {
+      display: none !important;
+    }
+
+    .tool-btn {
+      border: none;
+      color: #fff;
+      padding: 10px 16px;
+      font-size: 15px;
+      font-weight: 700;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: 0.25s ease;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
+      white-space: nowrap;
+    }
+
+    .tool-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .rollcall-btn {
+      background: linear-gradient(135deg, #1e88e5 0%, #42a5f5 100%);
+    }
+
+    .leaderboard-btn {
+      background: linear-gradient(135deg, #7b1fa2 0%, #ab47bc 100%);
+    }
+
+    .current-player {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 12px;
+      border: 2px solid var(--primary);
+      background: rgba(232, 245, 232, 0.96);
+      min-height: 42px;
+      max-width: 220px;
+    }
+
+    .current-player-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--primary);
+      white-space: nowrap;
+    }
+
+    .current-player-name {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--dark);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .game-stats {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      margin-right: 2px;
+    }
+
+    .close-btn {
+      background: linear-gradient(135deg, var(--danger) 0%, #e57373 100%);
+      color: white;
+      border: none;
+      width: 40px;
+      height: 40px;
+      font-size: 1.5em;
+      font-weight: 700;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 4px 12px rgba(211, 47, 47, 0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .close-btn:hover {
+      transform: translateY(-2px) scale(1.1) rotate(90deg);
+      box-shadow: 0 6px 16px rgba(211, 47, 47, 0.4);
+      background: linear-gradient(135deg, #c62828 0%, #d32f2f 100%);
+    }
+
+    .close-btn:active {
+      transform: translateY(0) scale(0.95);
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 8px 12px;
+      min-width: 74px;
+      background: var(--light);
+      border-radius: 10px;
+      border: 2px solid var(--primary);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 2px;
+    }
+
+    .stat-value {
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .timer {
+      font-size: 24px;
+      font-weight: 800;
+      color: var(--danger);
+      background: #fff;
+      padding: 8px 14px;
+      border-radius: 20px;
+      border: 2px solid var(--danger);
+      box-shadow: 0 2px 8px rgba(211, 47, 47, 0.16);
+      min-width: 138px;
+      text-align: center;
+    }
+
+    .control-btn {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      color: #fff;
+      border: none;
+      padding: 11px 22px;
+      font-size: 16px;
+      font-weight: 700;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: 0.25s ease;
+      box-shadow: 0 6px 16px rgba(56, 142, 60, 0.24);
+    }
+
+    .control-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(56, 142, 60, 0.3);
+    }
+
+    .control-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .hidden-control {
+      display: none !important;
+    }
+
+    .restart-btn {
+      background: linear-gradient(135deg, var(--warning) 0%, #ff9800 100%);
+      box-shadow: 0 6px 16px rgba(245, 124, 0, 0.24);
+    }
+
+    .pause-btn {
+      background: linear-gradient(135deg, var(--info) 0%, #42a5f5 100%);
+      box-shadow: 0 6px 16px rgba(25, 118, 210, 0.24);
+    }
+
+    .end-btn {
+      background: linear-gradient(135deg, var(--danger) 0%, #ef5350 100%);
+      box-shadow: 0 6px 16px rgba(211, 47, 47, 0.24);
+    }
+
+    .game-area {
+      position: relative;
+      flex: 1;
+      border-radius: 18px;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at center, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0.03) 40%, transparent 70%),
+        var(--game-bg);
+      box-shadow: inset 0 4px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    .game-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.28);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 20;
+      transition: 0.35s ease;
+    }
+
+    .game-overlay.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .overlay-text {
+      color: #fff;
+      font-size: 2.4em;
+      font-weight: 800;
+      text-align: center;
+      text-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+      animation: pulse 1.8s infinite;
+      padding: 0 20px;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.88; }
+      50% { transform: scale(1.04); opacity: 1; }
+    }
+
+    .result-cards-container {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 4;
+    }
+
+    .expression-zone {
+      position: absolute;
+      border: 2px dashed rgba(255,255,255,0.25);
+      border-radius: 28px;
+      background: rgba(255,255,255,0.06);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.1);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .expression-zone-label {
+      position: absolute;
+      top: 12px;
+      left: 18px;
+      color: rgba(255,255,255,0.9);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .expression-blocks {
+      position: absolute;
+      z-index: 6;
+    }
+
+    .result-card {
+      position: absolute;
+      pointer-events: auto;
+      cursor: pointer;
+      transition: transform 0.22s ease, box-shadow 0.22s ease;
+      z-index: 5;
+    }
+
+    .result-card.disabled {
+      pointer-events: none;
+      opacity: 0.8;
+    }
+
+    .wooden-sign {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      padding-bottom: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .wooden-board {
+      position: relative;
+      width: 100%;
+      height: calc(100% - 18px);
+      border-radius: 14px;
+      border: 4px solid var(--wood-dark);
+      background:
+        repeating-linear-gradient(
+          90deg,
+          transparent,
+          transparent 4px,
+          rgba(78, 52, 46, 0.08) 4px,
+          rgba(78, 52, 46, 0.08) 7px
+        ),
+        linear-gradient(135deg, var(--wood-medium) 0%, var(--wood-dark) 100%);
+      box-shadow:
+        0 8px 18px var(--wood-shadow),
+        inset 0 2px 0 var(--wood-highlight),
+        inset 0 -2px 0 var(--wood-grain);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      font-size: 1.7em;
+      font-weight: 800;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.35);
+    }
+
+    .wooden-board::before {
+      content: "";
+      position: absolute;
+      inset: 7px;
+      border: 2px solid rgba(255, 255, 255, 0.16);
+      border-radius: 9px;
+      pointer-events: none;
+    }
+
+    .wooden-stake {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      background: radial-gradient(circle, var(--wood-light) 35%, var(--wood-dark) 70%);
+      border-radius: 50%;
+      border: 2px solid var(--wood-grain);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.18);
+    }
+
+    .wooden-stake.top-left { top: -8px; left: -8px; }
+    .wooden-stake.top-right { top: -8px; right: -8px; }
+    .wooden-stake.bottom-left { bottom: -8px; left: -8px; }
+    .wooden-stake.bottom-right { bottom: -8px; right: -8px; }
+
+    .result-card:hover:not(.disabled) {
+      transform: translateY(-4px) scale(1.04);
+    }
+
+    .result-card.drag-over {
+      transform: translateY(-6px) scale(1.08);
+    }
+
+    .result-card.drag-over .wooden-board {
+      background:
+        repeating-linear-gradient(
+          90deg,
+          transparent,
+          transparent 4px,
+          rgba(255, 255, 255, 0.06) 4px,
+          rgba(255, 255, 255, 0.06) 7px
+        ),
+        linear-gradient(135deg, #5bbf65 0%, #2e7d32 100%);
+      border-color: #1f5f24;
+      box-shadow: 0 12px 26px rgba(46, 125, 50, 0.38);
+    }
+
+    .result-card.correct-match .wooden-board {
+      animation: correctWoodenMatch 0.7s ease;
+    }
+
+    .result-card.wrong-match .wooden-board {
+      animation: wrongWoodenMatch 0.45s ease;
+    }
+
+    @keyframes correctWoodenMatch {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.12); filter: brightness(1.14); }
+      100% { transform: scale(1); }
+    }
+
+    @keyframes wrongWoodenMatch {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-8px); }
+      75% { transform: translateX(8px); }
+    }
+
+    .expression-block {
+      position: absolute;
+      cursor: grab;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.3s ease;
+      transform-origin: center;
+    }
+
+    .expression-block.disabled {
+      pointer-events: none;
+      opacity: 0.78;
+      cursor: default;
+    }
+
+    .expression-block:hover:not(.disabled) {
+      transform: translateY(-4px) scale(1.03);
+      z-index: 99;
+    }
+
+    .expression-block.dragging {
+      opacity: 0.7;
+      transform: scale(1.08) rotate(2deg);
+      z-index: 100;
+      cursor: grabbing;
+    }
+
+    .mahjong-block {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+    }
+
+    .mahjong-shadow {
+      position: absolute;
+      inset: 4px -2px -4px 4px;
+      background: radial-gradient(ellipse at center, var(--mahjong-shadow) 0%, transparent 70%);
+      border-radius: 14px;
+      z-index: 0;
+    }
+
+    .mahjong-face {
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .mahjong-front {
+      inset: 0;
+      border-radius: 12px;
+      border: 2px solid #8cc88c;
+      background: linear-gradient(135deg, var(--mahjong-face) 0%, #dcedc8 100%);
+      box-shadow: inset 0 2px 0 rgba(255,255,255,0.7), inset 0 -2px 0 rgba(0,0,0,0.06);
+      font-size: 1.45em;
+      font-weight: 800;
+      color: var(--dark);
+      z-index: 2;
+    }
+
+    .mahjong-top {
+      left: 4px;
+      right: 4px;
+      top: -6px;
+      height: 10px;
+      border-radius: 10px 10px 0 0;
+      background: linear-gradient(90deg, var(--mahjong-top) 0%, #b7dfb7 100%);
+      border: 2px solid #8cc88c;
+      border-bottom: none;
+      z-index: 1;
+    }
+
+    .mahjong-right {
+      top: 4px;
+      bottom: 4px;
+      right: -6px;
+      width: 10px;
+      border-radius: 0 10px 10px 0;
+      background: linear-gradient(180deg, var(--mahjong-right) 0%, #99d099 100%);
+      border: 2px solid #8cc88c;
+      border-left: none;
+      z-index: 1;
+    }
+
+    .expression-block.correct-drop {
+      animation: correctDrop 0.7s ease forwards;
+    }
+
+    .expression-block.wrong-drop {
+      animation: wrongDrop 0.45s ease;
+    }
+
+    @keyframes correctDrop {
+      0% { transform: scale(1); opacity: 1; }
+      45% { transform: scale(1.16); opacity: 1; filter: brightness(1.16); }
+      100% { transform: scale(0.1) rotate(15deg); opacity: 0; }
+    }
+
+    @keyframes wrongDrop {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-10px) rotate(-2deg); }
+      40% { transform: translateX(10px) rotate(2deg); }
+      60% { transform: translateX(-6px) rotate(-1deg); }
+      80% { transform: translateX(6px) rotate(1deg); }
+    }
+
+    .success-particle {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #ffd54f;
+      pointer-events: none;
+      z-index: 1001;
+      animation: particle 0.95s ease-out forwards;
+    }
+
+    @keyframes particle {
+      0% {
+        transform: scale(1) translate(0, 0);
+        opacity: 1;
+      }
+      100% {
+        transform: scale(0) translate(var(--dx), var(--dy));
+        opacity: 0;
+      }
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      top: 92px;
+      transform: translateX(-50%) translateY(-10px);
+      padding: 12px 18px;
+      border-radius: 999px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 800;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.18);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 4000;
+      transition: 0.25s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .toast.success {
+      background: linear-gradient(135deg, #43a047 0%, #2e7d32 100%);
+    }
+
+    .toast.error {
+      background: linear-gradient(135deg, #ef5350 0%, #d32f2f 100%);
+    }
+
+    .victory-screen,
+    .modal-mask {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.78);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease;
+      z-index: 3000;
+      padding: 20px;
+    }
+
+    .modal-mask {
+      background: var(--modal-mask);
+      z-index: 3200;
+    }
+
+    .victory-screen.show,
+    .modal-mask.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .victory-content,
+    .modal-content {
+      width: min(92vw, 520px);
+      background: rgba(255,255,255,0.96);
+      border-radius: 28px;
+      padding: 32px 28px;
+      text-align: center;
+      box-shadow: 0 26px 60px rgba(0,0,0,0.28);
+      border: 3px solid var(--primary);
+      max-height: calc(100vh - 40px);
+      overflow: auto;
+    }
+
+    .leaderboard-content {
+      width: min(96vw, 920px);
+      text-align: left;
+      padding: 24px;
+    }
+
+    .rollcall-preview-content {
+      width: min(98vw, 1730px);
+      height: min(92vh, 840px);
+      padding: 0;
+      border: 1px solid rgba(125, 145, 214, 0.26);
+      border-radius: 24px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    .rollcall-preview-shell {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .rollcall-preview-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 12px 18px;
+      border-bottom: 1px solid rgba(123, 141, 196, 0.18);
+      background: rgba(255, 255, 255, 0.98);
+    }
+
+    .rollcall-preview-brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+      flex: 1;
+      flex-wrap: wrap;
+    }
+
+    .rollcall-preview-logo {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: #fff;
+      background: linear-gradient(135deg, #7b8cff 0%, #5bc2ff 100%);
+      box-shadow: 0 10px 20px rgba(104, 135, 255, 0.25);
+      flex-shrink: 0;
+    }
+
+    .rollcall-preview-title {
+      font-size: 18px;
+      font-weight: 800;
+      color: #263248;
+      white-space: nowrap;
+    }
+
+    .rollcall-preview-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      min-width: 0;
+    }
+
+    .rollcall-preview-select {
+      min-width: 160px;
+      padding: 11px 14px;
+      border-radius: 12px;
+      border: 1px solid #c9d1e8;
+      background: #fff;
+      color: #36445c;
+      font-size: 16px;
+      font-weight: 500;
+      box-shadow: 0 2px 8px rgba(140, 154, 201, 0.08);
+    }
+
+    .rollcall-preview-select--count {
+      min-width: 92px;
+    }
+
+    .rollcall-preview-dismiss {
+      border: none;
+      background: transparent;
+      color: #48556d;
+      font-size: 34px;
+      line-height: 1;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 10px;
+      transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .rollcall-preview-dismiss:hover {
+      background: rgba(72, 85, 109, 0.08);
+      color: #111827;
+    }
+
+    .rollcall-preview-body {
+      position: relative;
+      flex: 1;
+      padding: 0 0 18px;
+      background:
+        radial-gradient(circle at 15% 18%, rgba(255, 224, 170, 0.52) 0%, rgba(255, 224, 170, 0.14) 32%, transparent 56%),
+        radial-gradient(circle at 56% 24%, rgba(189, 240, 255, 0.52) 0%, rgba(189, 240, 255, 0.14) 36%, transparent 60%),
+        radial-gradient(circle at 78% 76%, rgba(224, 205, 255, 0.5) 0%, rgba(224, 205, 255, 0.14) 28%, transparent 55%),
+        linear-gradient(135deg, #fefbf5 0%, #f6fbff 58%, #fbf8ff 100%);
+    }
+
+    .rollcall-preview-stage {
+      position: relative;
+      height: 100%;
+      margin: 0 10px;
+      border-radius: 0 0 22px 22px;
+      border-top: 1px solid rgba(255, 255, 255, 0.78);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.34) 0%, rgba(255, 255, 255, 0.18) 100%);
+      padding: 58px 52px 136px;
+      overflow: auto;
+    }
+
+    .rollcall-preview-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-content: flex-start;
+      min-height: 240px;
+    }
+
+    .rollcall-preview-card {
+      width: 124px;
+      padding: 10px 10px 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(173, 189, 236, 0.65);
+      background: rgba(255, 255, 255, 0.88);
+      box-shadow: 0 12px 28px rgba(121, 144, 191, 0.14);
+    }
+
+    .rollcall-preview-card-inner {
+      border-radius: 12px;
+      border: 1px solid rgba(223, 229, 248, 0.95);
+      background: linear-gradient(180deg, #fff 0%, #f9fbff 100%);
+      padding: 14px 10px 12px;
+      text-align: center;
+      min-height: 142px;
+    }
+
+    .rollcall-preview-avatar {
+      width: 60px;
+      height: 60px;
+      margin: 0 auto 14px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      background: linear-gradient(180deg, #fff 0%, #ebf3ff 100%);
+      box-shadow: inset 0 0 0 1px rgba(168, 183, 226, 0.55);
+    }
+
+    .rollcall-preview-name {
+      font-size: 20px;
+      font-weight: 800;
+      color: #2d3340;
+      letter-spacing: 1px;
+    }
+
+    .rollcall-preview-footer {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 14px;
+      display: flex;
+      justify-content: center;
+      padding: 0 18px;
+    }
+
+    .rollcall-preview-start {
+      min-width: 160px;
+      border: none;
+      border-radius: 14px;
+      padding: 14px 34px;
+      color: #fff;
+      font-size: 18px;
+      font-weight: 800;
+      cursor: pointer;
+      background: linear-gradient(135deg, #1677ff 0%, #2296ff 100%);
+      box-shadow: 0 14px 28px rgba(22, 119, 255, 0.24);
+      transition: transform 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    .rollcall-preview-start:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 18px 32px rgba(22, 119, 255, 0.3);
+    }
+
+    .victory-title,
+    .modal-title {
+      font-size: 2.2em;
+      color: var(--primary);
+      font-weight: 800;
+      margin-bottom: 18px;
+      text-align: center;
+    }
+
+    .victory-stats {
+      font-size: 1.15em;
+      line-height: 1.8;
+      margin-bottom: 24px;
+      color: var(--dark);
+      font-weight: 700;
+    }
+
+    .victory-btn,
+    .modal-btn {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      color: #fff;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 999px;
+      font-size: 16px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: 0.22s ease;
+      box-shadow: 0 10px 24px rgba(56, 142, 60, 0.24);
+      white-space: nowrap;
+    }
+
+    .victory-btn:hover,
+    .modal-btn:hover {
+      transform: translateY(-2px);
+    }
+
+    .modal-btn.secondary {
+      background: linear-gradient(135deg, #78909c 0%, #90a4ae 100%);
+      box-shadow: 0 10px 24px rgba(120, 144, 156, 0.24);
+    }
+
+    .modal-btn.warning {
+      background: linear-gradient(135deg, #fb8c00 0%, #ffa726 100%);
+      box-shadow: 0 10px 24px rgba(251, 140, 0, 0.24);
+    }
+
+    .modal-close {
+      position: sticky;
+      top: -8px;
+      margin-left: auto;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      border: none;
+      background: #f2f2f2;
+      color: #666;
+      font-size: 24px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2;
+    }
+
+    .modal-section {
+      background: rgba(232, 245, 232, 0.55);
+      border: 1px solid var(--border-soft);
+      border-radius: 18px;
+      padding: 16px;
+      margin-top: 16px;
+    }
+
+    .modal-section-title {
+      font-size: 16px;
+      color: var(--primary);
+      font-weight: 800;
+      margin-bottom: 12px;
+    }
+
+    .class-form-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .class-form-row .student-name-input,
+    .class-form-row .modal-select {
+      flex: 1 1 180px;
+      width: auto;
+      margin-top: 0;
+    }
+
+    .modal-helper {
+      font-size: 13px;
+      color: #5f6d73;
+      line-height: 1.7;
+      margin-top: 8px;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+    }
+
+    .roster-textarea {
+      width: 100%;
+      min-height: 112px;
+      line-height: 1.7;
+      resize: vertical;
+      font-family: inherit;
+      font-weight: 600;
+    }
+
+    .student-name-input {
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .draw-result {
+      min-height: 120px;
+      border-radius: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      background: linear-gradient(135deg, rgba(56,142,60,0.08) 0%, rgba(255,255,255,0.95) 100%);
+      border: 2px dashed rgba(56, 142, 60, 0.35);
+      padding: 18px;
+      gap: 8px;
+    }
+
+    .draw-result-label {
+      color: var(--primary);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .draw-result-name {
+      font-size: 2.1em;
+      font-weight: 900;
+      color: var(--dark);
+      word-break: break-all;
+    }
+
+    .leaderboard-toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+      margin-bottom: 16px;
+    }
+
+    .leaderboard-toolbar label {
+      white-space: nowrap;
+    }
+
+    .leaderboard-summary {
+      font-size: 14px;
+      color: #5f6d73;
+      font-weight: 600;
+      white-space: nowrap;
+      margin-left: auto;
+    }
+
+    .table-wrap {
+      border: 2px solid rgba(56, 142, 60, 0.16);
+      border-radius: 18px;
+      overflow: auto;
+      background: #fff;
+      max-height: 56vh;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 720px;
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      background: #edf7ed;
+      color: var(--primary);
+      font-weight: 800;
+      font-size: 14px;
+      padding: 12px 10px;
+      border-bottom: 2px solid rgba(56, 142, 60, 0.16);
+      text-align: left;
+      z-index: 1;
+    }
+
+    tbody td {
+      padding: 12px 10px;
+      border-bottom: 1px solid rgba(56, 142, 60, 0.12);
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--dark);
+    }
+
+    tbody tr:nth-child(even) {
+      background: rgba(232, 245, 232, 0.32);
+    }
+
+    .rank-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      background: #edf7ed;
+      color: var(--primary);
+      font-weight: 800;
+    }
+
+    .empty-state {
+      padding: 36px 18px;
+      text-align: center;
+      color: #607d8b;
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+
+    .sort-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: none;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .sort-btn:hover {
+      color: var(--secondary);
+    }
+
+    .sort-indicator {
+      font-size: 12px;
+      min-width: 12px;
+      display: inline-block;
+      text-align: center;
+    }
+
+    .action-btn {
+      border: none;
+      background: rgba(123, 31, 162, 0.1);
+      color: #7b1fa2;
+      font-weight: 800;
+      border-radius: 999px;
+      padding: 7px 12px;
+      cursor: pointer;
+      transition: 0.2s ease;
+      white-space: nowrap;
+    }
+
+    .action-btn:hover {
+      background: rgba(123, 31, 162, 0.18);
+      transform: translateY(-1px);
+    }
+
+    .history-content {
+      width: min(96vw, 860px);
+      text-align: left;
+      padding: 24px;
+    }
+
+    .history-summary {
+      margin-top: 6px;
+      margin-bottom: 16px;
+      color: #5f6d73;
+      font-size: 14px;
+      font-weight: 600;
+      text-align: left;
+    }
+
+    
+    #setupModal {
+      inset: auto;
+      align-items: center;
+      justify-content: center;
+      padding: 18px;
+      border-radius: 18px;
+      overflow: hidden;
+    }
+    .setup-content { width: min(96vw, 640px); max-width: 100%; text-align: left; padding: 28px; margin: 0 auto; }
+    .setup-layout { display: flex; justify-content: center; margin-top: 6px; }
+    .setup-card { width: min(100%, 520px); margin: 0 auto; background: rgba(232, 245, 232, 0.5); border: 1px solid var(--border-soft); border-radius: 20px; padding: 22px; display: flex; flex-direction: column; gap: 16px; box-shadow: 0 12px 28px rgba(56, 142, 60, 0.08); }
+    .setup-field { display: flex; flex-direction: column; gap: 8px; }
+    .setup-mode-group { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .mode-option { border: 2px solid rgba(56, 142, 60, 0.16); border-radius: 16px; background: #fff; padding: 14px; cursor: pointer; display: flex; flex-direction: column; gap: 6px; transition: 0.25s ease; }
+    .mode-option input { display: none; }
+    .mode-option.active { border-color: var(--primary); box-shadow: 0 10px 22px rgba(56, 142, 60, 0.12); background: linear-gradient(135deg, rgba(232,245,232,0.9) 0%, #fff 100%); }
+    .mode-option-title { font-size: 17px; font-weight: 800; color: var(--primary); }
+    .mode-option-desc { font-size: 13px; line-height: 1.6; color: #5f6d73; font-weight: 600; }
+    .setup-student-box { min-height: 96px; border-radius: 18px; border: 2px dashed rgba(56, 142, 60, 0.26); background: linear-gradient(135deg, rgba(56,142,60,0.08) 0%, rgba(255,255,255,0.98) 100%); display: flex; align-items: center; justify-content: center; padding: 14px; font-size: 28px; font-weight: 900; color: var(--dark); text-align: center; }
+    .setup-inline-actions { justify-content: center; margin-top: 0; }
+    .setup-start-bar { margin-top: 20px; display: flex; justify-content: center; }
+    .setup-tip { font-size: 13px; color: #5f6d73; line-height: 1.7; font-weight: 600; text-align: center; }
+    .secondary-rollcall-btn { background: linear-gradient(135deg, #43a047 0%, #2e7d32 100%); box-shadow: 0 14px 28px rgba(46, 125, 50, 0.24); }
+    .secondary-rollcall-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; box-shadow: none; }
+    .rollcall-preview-card.is-active .rollcall-preview-card-inner { border-color: #7b8cff; background: linear-gradient(180deg, #fff 0%, #eef3ff 100%); box-shadow: 0 0 0 3px rgba(123, 140, 255, 0.14); }
+    .rollcall-preview-card.is-winner .rollcall-preview-card-inner { border-color: #43a047; background: linear-gradient(180deg, #fff 0%, #eef9ef 100%); box-shadow: 0 0 0 4px rgba(67, 160, 71, 0.18); animation: winnerPulse 0.8s ease; }
+    @keyframes winnerPulse { 0% { transform: scale(1); } 50% { transform: scale(1.04); } 100% { transform: scale(1); } }
+
+@media (max-width: 1200px) {
+      .game-header {
+        align-items: flex-start;
+      }
+
+      .header-right {
+        align-self: stretch;
+        justify-content: flex-end;
+      }
+
+      .header-tools {
+        justify-content: flex-end;
+      }
+    }
+
+    @media (max-width: 1024px) {
+      .game-title {
+        font-size: 1.5em;
+      }
+
+      .timer {
+        font-size: 20px;
+      }
+
+      .current-player {
+        max-width: 180px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      body {
+        overflow: hidden;
+      }
+
+      .game-container {
+        padding: 6px;
+        gap: 6px;
+      }
+
+      .game-header {
+        padding: 10px 12px;
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .game-title {
+        font-size: 1.15em;
+        gap: 8px;
+      }
+
+      .header-right,
+      .header-tools,
+      .tool-buttons,
+      .game-stats {
+        justify-content: center;
+      }
+
+      .current-player {
+        max-width: none;
+      }
+
+      .control-btn,
+      .tool-btn,
+      .modal-btn {
+        padding: 9px 16px;
+        font-size: 14px;
+      }
+
+      .stat-item {
+        min-width: 66px;
+        padding: 6px 8px;
+      }
+
+      .stat-value {
+        font-size: 18px;
+      }
+
+      .timer {
+        font-size: 18px;
+        min-width: 118px;
+      }
+
+      .close-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 1.3em;
+      }
+
+      .overlay-text {
+        font-size: 1.7em;
+      }
+
+      .toast {
+        top: 126px;
+        font-size: 14px;
+      }
+
+      .victory-title,
+      .modal-title {
+        font-size: 1.85em;
+      }
+
+      .victory-stats {
+        font-size: 1em;
+      }
+
+      .leaderboard-content {
+        padding: 18px;
+      }
+
+      .setup-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .setup-mode-group {
+        grid-template-columns: 1fr;
+      }
+
+      .draw-result-name {
+        font-size: 1.8em;
+      }
+
+      .rollcall-preview-content {
+        height: min(92vh, 760px);
+      }
+
+      .rollcall-preview-header {
+        align-items: flex-start;
+      }
+
+      .rollcall-preview-brand {
+        align-items: flex-start;
+      }
+
+      .rollcall-preview-select {
+        min-width: 132px;
+        font-size: 15px;
+      }
+
+      .rollcall-preview-stage {
+        padding: 26px 18px 110px;
+      }
+
+      .rollcall-preview-grid {
+        gap: 12px;
+      }
+
+      .rollcall-preview-card {
+        width: calc(50% - 6px);
+        min-width: 132px;
+      }
+    }
+
+    @media (max-width: 560px) {
+      .expression-count-selector {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .count-select,
+      .modal-select {
+        width: 100%;
+      }
+
+      .tool-buttons,
+      .game-stats {
+        width: 100%;
+      }
+
+      .game-stats {
+        gap: 10px;
+      }
+
+      .modal-content,
+      .victory-content {
+        padding: 18px;
+        border-radius: 22px;
+      }
+
+      .rollcall-preview-content {
+        padding: 0;
+      }
+
+      .leaderboard-toolbar {
+        width: 100%;
+      }
+
+      .leaderboard-summary {
+        margin-left: 0;
+      }
+
+      .setup-content {
+        padding: 18px;
+      }
+
+      .rollcall-preview-header {
+        padding: 12px;
+      }
+
+      .rollcall-preview-toolbar {
+        width: 100%;
+      }
+
+      .rollcall-preview-select {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .rollcall-preview-card {
+        width: 100%;
+      }
+    }
+  
+
+    .prd-float-btn {
+      position: fixed;
+      right: 24px;
+      bottom: 24px;
+      z-index: 3600;
+      border: none;
+      border-radius: 999px;
+      padding: 14px 20px;
+      background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      box-shadow: 0 18px 36px rgba(15, 118, 110, 0.28);
+      cursor: pointer;
+      transition: transform 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    .prd-float-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 22px 40px rgba(15, 118, 110, 0.34);
+    }
+
+    .prd-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 3700;
+      background: rgba(0, 0, 0, 0.56);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 22px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.28s ease;
+    }
+
+    .prd-modal.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .prd-shell {
+      width: min(96vw, 1420px);
+      height: min(92vh, 900px);
+      background: #fff;
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 0 28px 60px rgba(0, 0, 0, 0.24);
+      display: grid;
+      grid-template-columns: 300px minmax(0, 1fr);
+      border: 1px solid rgba(56, 142, 60, 0.14);
+    }
+
+    .prd-sidebar {
+      background: linear-gradient(180deg, #f5fbf5 0%, #eef7ff 100%);
+      border-right: 1px solid rgba(56, 142, 60, 0.12);
+      padding: 24px 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      min-height: 0;
+    }
+
+    .prd-sidebar-header {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .prd-sidebar-title {
+      font-size: 22px;
+      font-weight: 900;
+      color: #1f2937;
+    }
+
+    .prd-sidebar-desc {
+      font-size: 13px;
+      line-height: 1.7;
+      color: #607080;
+      font-weight: 600;
+    }
+
+    .prd-nav {
+      overflow: auto;
+      padding-right: 6px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .prd-nav-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .prd-nav-label {
+      font-size: 12px;
+      font-weight: 800;
+      color: #0f766e;
+      letter-spacing: 0.8px;
+      padding: 8px 10px 2px;
+    }
+
+    .prd-nav-item {
+      border: none;
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      color: #334155;
+      padding: 10px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 700;
+      transition: background 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    }
+
+    .prd-nav-item.prd-sub {
+      margin-left: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #526274;
+    }
+
+    .prd-nav-item:hover {
+      background: rgba(20, 184, 166, 0.1);
+      color: #0f766e;
+      transform: translateX(2px);
+    }
+
+    .prd-nav-item.active {
+      background: linear-gradient(135deg, rgba(15, 118, 110, 0.14) 0%, rgba(56, 189, 248, 0.14) 100%);
+      color: #0f766e;
+      box-shadow: inset 0 0 0 1px rgba(15, 118, 110, 0.16);
+    }
+
+    .prd-main {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      min-height: 0;
+    }
+
+    .prd-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 20px 24px;
+      border-bottom: 1px solid rgba(56, 142, 60, 0.12);
+      background: rgba(255, 255, 255, 0.96);
+    }
+
+    .prd-topbar-meta {
+      min-width: 0;
+    }
+
+    .prd-topbar-title {
+      font-size: 26px;
+      font-weight: 900;
+      color: #1f2937;
+      margin-bottom: 6px;
+    }
+
+    .prd-topbar-desc {
+      font-size: 14px;
+      line-height: 1.7;
+      color: #607080;
+      font-weight: 600;
+    }
+
+    .prd-close {
+      border: none;
+      background: #f4f4f5;
+      color: #475569;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      font-size: 24px;
+      font-weight: 700;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+    .prd-close:hover {
+      background: #e5e7eb;
+      transform: rotate(90deg);
+    }
+
+    .prd-content {
+      padding: 24px 28px 32px;
+      overflow: auto;
+      scroll-behavior: smooth;
+      background: linear-gradient(180deg, #ffffff 0%, #fbfdfb 100%);
+    }
+
+    .prd-section {
+      margin-bottom: 32px;
+      padding: 24px;
+      border-radius: 22px;
+      border: 1px solid rgba(56, 142, 60, 0.12);
+      background: #fff;
+      box-shadow: 0 10px 26px rgba(15, 23, 42, 0.04);
+    }
+
+    .prd-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .prd-section h2,
+    .prd-section h3,
+    .prd-section h4 {
+      color: #1f2937;
+      margin-bottom: 12px;
+    }
+
+    .prd-section h2 {
+      font-size: 28px;
+      font-weight: 900;
+    }
+
+    .prd-section h3 {
+      font-size: 20px;
+      font-weight: 800;
+      margin-top: 18px;
+    }
+
+    .prd-section h4 {
+      font-size: 16px;
+      font-weight: 800;
+      margin-top: 16px;
+    }
+
+    .prd-section p,
+    .prd-section li {
+      font-size: 14px;
+      line-height: 1.9;
+      color: #475569;
+      font-weight: 600;
+    }
+
+    .prd-section ul,
+    .prd-section ol {
+      margin-left: 20px;
+      margin-top: 10px;
+    }
+
+    .prd-highlight-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 14px;
+    }
+
+    .prd-highlight-card {
+      border-radius: 18px;
+      padding: 16px;
+      background: linear-gradient(135deg, rgba(232, 245, 232, 0.7) 0%, rgba(236, 253, 245, 0.9) 100%);
+      border: 1px solid rgba(56, 142, 60, 0.12);
+    }
+
+    .prd-highlight-card strong {
+      display: block;
+      color: #0f766e;
+      font-size: 15px;
+      margin-bottom: 6px;
+    }
+
+    .prd-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 12px;
+      overflow: hidden;
+      border-radius: 16px;
+      border: 1px solid rgba(56, 142, 60, 0.12);
+    }
+
+    .prd-table th,
+    .prd-table td {
+      padding: 12px 14px;
+      border-bottom: 1px solid rgba(56, 142, 60, 0.12);
+      text-align: left;
+      vertical-align: top;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .prd-table th {
+      background: #edf7ed;
+      color: #0f766e;
+      font-weight: 800;
+    }
+
+    .prd-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .prd-anchor {
+      scroll-margin-top: 18px;
+    }
+
+    @media (max-width: 1100px) {
+      .prd-shell {
+        grid-template-columns: 250px minmax(0, 1fr);
+      }
+    }
+
+    @media (max-width: 900px) {
+      .prd-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .prd-sidebar {
+        border-right: none;
+        border-bottom: 1px solid rgba(56, 142, 60, 0.12);
+        max-height: 240px;
+      }
+
+      .prd-highlight-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .prd-float-btn {
+        right: 14px;
+        bottom: 14px;
+        padding: 12px 16px;
+        font-size: 14px;
+      }
+
+      .prd-modal {
+        padding: 10px;
+      }
+
+      .prd-shell {
+        width: 100%;
+        height: 94vh;
+        border-radius: 20px;
+      }
+
+      .prd-topbar {
+        padding: 16px 18px;
+      }
+
+      .prd-topbar-title {
+        font-size: 22px;
+      }
+
+      .prd-content {
+        padding: 18px;
+      }
+
+      .prd-section {
+        padding: 18px;
+        border-radius: 18px;
+      }
+
+      .prd-section h2 {
+        font-size: 24px;
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <div class="game-container">
+    <div class="game-header">
+      <div class="game-title">
+        <span class="game-title-text">🧮 九九乘法口诀消消乐</span>
+        <button class="control-btn pause-btn hidden-control" id="pauseBtn" onclick="togglePauseGame()" disabled>⏸暂停活动</button>
+        <button class="control-btn end-btn hidden-control" id="endBtn" onclick="endGame()" disabled>⏹结束活动</button>
+        <button class="control-btn restart-btn hidden-control" id="restartBtn" onclick="restartGame()">🔄重新开始</button>
+      </div>
+
+      <div class="header-right">
+        <div class="header-tools">
+          <div class="tool-buttons">
+            <button class="tool-btn leaderboard-btn" onclick="openLeaderboardModal()">🏆排行榜</button>
+          </div>
+          <div class="current-player hidden-control" id="currentPlayerPanel" title="当前被点名上台作答的学生">
+            <span class="current-player-label">当前作答</span>
+            <span class="current-player-name" id="currentStudentName">未点名</span>
+          </div>
+          <div class="game-stats hidden-control" id="gameStatsPanel">
+            <div class="stat-item">
+              <div class="stat-label">得分率</div>
+              <div class="stat-value" id="scoreRate">0%</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-label">正确</div>
+              <div class="stat-value" id="correct">0</div>
+            </div>
+            <div class="timer" id="timer">00:00:00</div>
+          </div>
+        </div>
+        <button class="close-btn" onclick="closeGame()" title="关闭">✕</button>
+      </div>
+    </div>
+
+    <div class="game-area" id="gameArea">
+      <div class="game-overlay" id="gameOverlay">
+        <div class="overlay-text" id="overlayText">点击“开始活动”开始挑战！</div>
+      </div>
+
+      <div class="expression-zone" id="expressionZone"></div>
+      <div class="expression-zone-label" id="expressionZoneLabel"></div>
+
+      <div class="result-cards-container" id="resultCardsContainer"></div>
+      <div class="expression-blocks" id="expressionBlocks"></div>
+    </div>
+  </div>
+
+    <div class="modal-mask show" id="setupModal">
+    <div class="modal-content setup-content">
+      <div class="modal-title">⚙️ 活动设置</div>
+      <div class="setup-layout">
+        <div class="setup-card">
+          <div class="modal-section-title"></div>
+          <div class="setup-field">
+            <label for="expressionCount"><strong>难度</strong></label>
+            <select id="expressionCount" class="modal-select">
+              <option value="9">简单</option>
+              <option value="18" selected>较易</option>
+              <option value="27">普通</option>
+              <option value="36">困难</option>
+              <option value="45">特难</option>
+            </select>
+          </div>
+          <div class="setup-field">
+            <label for="setupClassSelect"><strong>班级</strong></label>
+            <select id="setupClassSelect" class="modal-select"></select>
+          </div>
+          <div class="setup-field">
+            <label><strong>作答模式</strong></label>
+            <div class="setup-mode-group">
+              <label class="mode-option active" id="modeOptionRandom"><input type="radio" name="answerMode" value="random" checked /><span class="mode-option-title">随机点名</span><span class="mode-option-desc">从班级学生名单中随机抽取 1 名学生开始作答</span></label>
+              <label class="mode-option" id="modeOptionManual"><input type="radio" name="answerMode" value="manual" /><span class="mode-option-title">指定学生</span><span class="mode-option-desc">从班级学生名单中指定某位学生开始作答</span></label>
+            </div>
+          </div>
+          <div class="setup-field" id="setupRandomPanel">
+            <label><strong>随机点名结果</strong></label>
+            <div class="setup-student-box" id="setupSelectedStudent">未抽取学生</div>
+            <div class="modal-actions setup-inline-actions"><button class="modal-btn" type="button" onclick="drawSetupStudent()">🎲随机抽取学生</button></div>
+          </div>
+          <div class="setup-field hidden-control" id="setupManualPanel">
+            <label for="setupManualStudentSelect"><strong>选择学生</strong></label>
+            <select id="setupManualStudentSelect" class="modal-select"><option value="">请选择学生</option></select>
+          </div>
+                  </div>
+      </div>
+      <div class="setup-start-bar"><button class="modal-btn" type="button" onclick="startGame()">🚀开始活动</button></div>
+    </div>
+  </div>
+  <div class="toast" id="toast"></div>
+
+  <div class="victory-screen" id="victoryScreen">
+    <div class="victory-content">
+      <div class="victory-title">🎉 恭喜通关！</div>
+      <div class="victory-stats">
+        当前学生：<span id="finalStudent">未点名</span><br />
+        最终得分率：<span id="finalScoreRate">0%</span><br />
+        用时：<span id="finalTime">0分0秒</span><br />
+        正确数：<span id="finalCorrect">0</span><br />
+        难度：<span id="finalExpressionCount">较易</span>
+      </div>
+      <button class="victory-btn" onclick="restartGame()">🔄再玩一次</button>
+    </div>
+  </div>
+  <div class="modal-mask" id="leaderboardModal">
+    <div class="modal-content leaderboard-content">
+      <button class="modal-close" onclick="closeLeaderboardModal()" aria-label="关闭">×</button>
+      <div class="modal-title">🏆排行榜</div>
+
+      <div class="leaderboard-toolbar">
+        <label for="leaderboardClassFilter"><strong>班级：</strong></label>
+        <select id="leaderboardClassFilter" class="modal-select" onchange="renderLeaderboard()">
+          <option value="all">全部班级</option>
+        </select>
+        <label for="leaderboardFilter"><strong>
+          难度：</strong></label>
+        <select id="leaderboardFilter" class="modal-select" onchange="renderLeaderboard()">
+          <option value="all">全部</option>
+          <option value="9">简单</option>
+          <option value="18">较易</option>
+          <option value="27">普通</option>
+          <option value="36">困难</option>
+          <option value="45">特难</option>
+        </select>
+        <div class="leaderboard-summary" id="leaderboardSummary">暂无历史记录</div>
+        <button class="modal-btn secondary" onclick="clearLeaderboard()">🗑清空记录</button>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th><button class="sort-btn" type="button" onclick="changeLeaderboardSort('rank')">排名 <span class="sort-indicator" id="sortIndicator-rank">↓</span></button></th>
+              <th>学生</th>
+              <th>班级</th>
+              <th>难度</th>
+              <th><button class="sort-btn" type="button" onclick="changeLeaderboardSort('seconds')">用时 <span class="sort-indicator" id="sortIndicator-seconds">↕</span></button></th>
+              <th><button class="sort-btn" type="button" onclick="changeLeaderboardSort('scoreRate')">得分率 <span class="sort-indicator" id="sortIndicator-scoreRate">↕</span></button></th>
+              <th><button class="sort-btn" type="button" onclick="changeLeaderboardSort('correctCount')">正确数 <span class="sort-indicator" id="sortIndicator-correctCount">↕</span></button></th>
+              <th>状态</th>
+              <th><button class="sort-btn" type="button" onclick="changeLeaderboardSort('finishedAt')">完成时间 <span class="sort-indicator" id="sortIndicator-finishedAt">↕</span></button></th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboardBody"></tbody>
+        </table>
+        <div class="empty-state" id="leaderboardEmpty">暂无历史记录，完成一局后会自动进入排行榜。</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-mask" id="historyModal">
+    <div class="modal-content history-content">
+      <button class="modal-close" onclick="closeHistoryModal()" aria-label="关闭">×</button>
+      <div class="modal-title">📚 学生作答历史</div>
+      <div class="history-summary" id="historySummary">暂无历史记录</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>序号</th>
+              <th>学生</th>
+              <th>班级</th>
+              <th>难度</th>
+              <th>用时</th>
+              <th>得分率</th>
+              <th>正确数</th>
+              <th>状态</th>
+              <th>完成时间</th>
+            </tr>
+          </thead>
+          <tbody id="historyBody"></tbody>
+        </table>
+        <div class="empty-state" id="historyEmpty">该学生在该难度下暂无历史记录。</div>
+      </div>
+    </div>
+  </div>
+
+  
+
+  <button class="prd-float-btn" id="prdFloatBtn" type="button" onclick="openPrdModal()">📘 查看PRD</button>
+
+  <div class="prd-modal" id="prdModal">
+    <div class="prd-shell">
+      <aside class="prd-sidebar">
+        <div class="prd-sidebar-header">
+          <div class="prd-sidebar-title">PRD 文档目录</div>
+          <div class="prd-sidebar-desc">左侧点击目录快速定位，右侧查看完整产品说明、模块逻辑与业务流程。</div>
+        </div>
+        <nav class="prd-nav" id="prdNav">
+          <div class="prd-nav-group">
+            <div class="prd-nav-label"></div>
+            <button class="prd-nav-item" data-target="prd-overview">1. 产品概述</button>
+            <button class="prd-nav-item prd-sub" data-target="prd-positioning">1.1 产品定位</button>
+            <button class="prd-nav-item prd-sub" data-target="prd-value">1.2 核心价值</button>
+          </div>
+          <div class="prd-nav-group">
+            <div class="prd-nav-label"></div>
+            <button class="prd-nav-item" data-target="prd-modules">2. 功能模块总览</button>
+            <button class="prd-nav-item prd-sub" data-target="prd-module-settings">2.1 活动设置模块</button>
+            <button class="prd-nav-item prd-sub" data-target="prd-module-game">2.2 活动作答模块</button>
+            <button class="prd-nav-item prd-sub" data-target="prd-module-result">2.3 结果统计模块</button>
+            <button class="prd-nav-item prd-sub" data-target="prd-module-ranking">2.4 排行榜与历史模块</button>
+          </div>
+          <div class="prd-nav-group">
+            <div class="prd-nav-label"></div>
+            <button class="prd-nav-item" data-target="prd-flow">3. 业务流程总览</button>
+            <button class="prd-nav-item prd-sub" data-target="prd-start-flow">3.1 发起流程</button>
+            <button class="prd-nav-item prd-sub" data-target="prd-answer-flow">3.2 作答流程</button>
+            <button class="prd-nav-item prd-sub" data-target="prd-data-flow">3.3 结果沉淀流程</button>
+          </div>
+        </nav>
+      </aside>
+
+      <section class="prd-main">
+        <div class="prd-topbar">
+          <div class="prd-topbar-meta">
+            <div class="prd-topbar-title">《九九乘法口诀消消乐》完整 PRD</div>
+            <div class="prd-topbar-desc"></div>
+          </div>
+          <button class="prd-close" type="button" onclick="closePrdModal()">×</button>
+        </div>
+
+        <div class="prd-content" id="prdContent">
+          <article class="prd-section prd-anchor" id="prd-overview">
+            <h2>1. 产品概述</h2>
+            <p>九九乘法口诀消消乐是一款面向小学数学课堂的互动答题活动。教师在活动开始前选择难度、班级与作答学生后，学生通过拖拽乘法算式牌到正确结果牌的方式完成匹配，系统同步统计正确数、得分率、作答用时与历史成绩。</p>
+            <div class="prd-highlight-grid">
+              <div class="prd-highlight-card">
+                <strong>目标用户</strong>
+                <p>小学数学教师、参与课堂互动的学生、需要快速组织课堂竞赛与抽查的教学场景。</p>
+              </div>
+              <div class="prd-highlight-card">
+                <strong>核心场景</strong>
+                <p>课堂导入热身、知识巩固、随机抽查、分层练习、课堂竞赛与课后复盘。</p>
+              </div>
+            </div>
+          </article>
+
+          <article class="prd-section prd-anchor" id="prd-positioning">
+            <h3>1.1 产品定位</h3>
+            <p>本产品定位为“课堂即时互动型数学练习工具”。它不是单纯的题库练习页，而是以课堂即时反馈为核心，强调教师快速发起、学生快速参与、结果快速沉淀。</p>
+            <table class="prd-table">
+              <thead>
+                <tr><th>维度</th><th>定义</th></tr>
+              </thead>
+              <tbody>
+                <tr><td>产品类型</td><td>课堂互动教学活动</td></tr>
+                <tr><td>知识范围</td><td>九九乘法口诀与结果匹配</td></tr>
+                <tr><td>使用方式</td><td>教师投屏发起，学生上台或触屏作答</td></tr>
+                <tr><td>价值侧重</td><td>趣味化练习、课堂控场、过程数据可追踪</td></tr>
+              </tbody>
+            </table>
+          </article>
+
+          <article class="prd-section prd-anchor" id="prd-value">
+            <h3>1.2 核心价值</h3>
+            <ul>
+              <li><strong>提升参与度：</strong>用拖拽消除的活动形式替代传统口算问答，降低学生畏难情绪。</li>
+              <li><strong>提升教学效率：</strong>教师只需完成基础设置即可开局，无需额外组织复杂流程。</li>
+              <li><strong>支持课堂管理：</strong>随机点名和指定学生双模式并存，兼顾公平抽查与定向辅导。</li>
+              <li><strong>沉淀过程数据：</strong>通关、结束、历史记录、排行榜四类结果可被教师复盘使用。</li>
+            </ul>
+          </article>
+
+          <article class="prd-section prd-anchor" id="prd-modules">
+            <h2>2. 功能模块</h2>
+            <p>系统由活动设置、活动作答、结果统计、排行榜与历史、完整 PRD 查看五大模块组成。每个模块都需要同时定义功能描述、功能逻辑与交互逻辑，确保开发实现时无歧义。</p>
+          </article>
+
+          <article class="prd-section prd-anchor" id="prd-module-settings">
+            <h3>2.1 活动设置模块</h3>
+            <h4>功能描述</h4>
+            <p>在活动正式开始前，系统以弹窗形式要求教师完成难度、班级、作答模式、作答学生的配置。未完成配置前，活动区不可操作。</p>
+            <h4>功能逻辑</h4>
+            <ul>
+              <li>难度共五档：简单 9 题、较易 18 题、普通 27 题、困难 36 题、特难 45 题，默认选中较易。</li>
+              <li>班级通过下拉选择，当前版本内置默认班级及学生名单。</li>
+              <li>作答模式分为“随机点名”和“指定学生”，两者互斥。</li>
+              <li>随机点名模式下必须先完成抽取，指定学生模式下必须完成选择，方可开始活动。</li>
+              <li>切换班级或切换模式时，需要清空原已选学生，避免错误继承。</li>
+            </ul>
+            <h4>交互逻辑</h4>
+            <ul>
+              <li>页面首次加载默认展示设置弹窗，并覆盖游戏区域。</li>
+              <li>点击“随机抽取学生”后，抽中结果展示在当前区域并 Toast 提示。</li>
+              <li>开始活动校验失败时，Toast 提示明确原因，例如“请先随机抽取学生”。</li>
+            </ul>
+          </article>
+
+          <article class="prd-section prd-anchor" id="prd-module-game">
+            <h3>2.2 活动作答模块</h3>
+            <h4>功能描述</h4>
+            <p>活动开始后，中间区域展示算式牌，四周展示结果牌。学生将算式牌拖拽至目标结果牌完成匹配，系统根据匹配关系给出正确或错误反馈。</p>
+            <h4>功能逻辑</h4>
+            <ul>
+              <li>系统基于内置题库随机生成本轮算式，按所选难度截取题组。</li>
+              <li>同一结果可能对应多个算式，但结果牌按结果去重，仅展示一张。</li>
+              <li>正确拖拽：算式标记为已完成，正确数 +1，算式从界面消失。</li>
+              <li>错误拖拽：播放错误反馈动画，不移除算式，允许再次尝试。</li>
+              <li>活动状态分为未开始、进行中、暂停、已完成、已结束。</li>
+            </ul>
+            <h4>交互逻辑</h4>
+            <ul>
+              <li>拖拽经过结果牌时，结果牌高亮，帮助学生感知投放区域。</li>
+              <li>暂停后展示蒙层并禁用拖拽；恢复后关闭蒙层并继续计时。</li>
+              <li>重新开始会重置当前局，但不直接进入活动，而是回到设置弹窗重新配置。</li>
+            </ul>
+          </article>
+
+          <article class="prd-section prd-anchor" id="prd-module-result">
+            <h3>2.3 结果统计模块</h3>
+            <h4>功能描述</h4>
+            <p>系统在活动过程中实时记录正确数、得分率和用时，并在通关或中途结束时形成最终记录。</p>
+            <h4>功能逻辑</h4>
+            <ul>
+              <li>正确数初始为 0，每答对 1 题累加 1。</li>
+              <li>得分率 = 正确数 ÷ 总题数 × 100%，结果以整数百分比展示。</li>
+              <li>计时器在开始时启动，暂停时停止累计，恢复后续计，完成或结束时停止。</li>
+              <li>全部题目完成后自动弹出通关弹窗，展示学生、班级、难度、得分率、正确数与总用时。</li>
+            </ul>
+            <h4>交互逻辑</h4>
+            <ul>
+              <li>顶部面板持续显示当前作答学生与过程数据，帮助教师实时观察表现。</li>
+              <li>通关弹窗内提供“再玩一次”按钮，便于快速发起下一轮。</li>
+            </ul>
+          </article>
+
+          <article class="prd-section prd-anchor" id="prd-module-ranking">
+            <h3>2.4 排行榜与历史模块</h3>
+            <h4>功能描述</h4>
+            <p>排行榜用于展示学生在各难度下的最新成绩；历史模块用于查看某一学生在某一班级和某一难度下的全部历史作答记录。</p>
+            <h4>功能逻辑</h4>
+            <ul>
+              <li>排行榜记录维度为：班级 + 学生 + 难度。相同维度保留最新一条作为排行榜展示数据。</li>
+              <li>历史记录保留同一维度下的全部作答轨迹。</li>
+              <li>排行榜支持班级筛选、难度筛选和按排名、用时、得分率、正确数、完成时间排序。</li>
+              <li>中途结束的记录状态标记为“结束”，正常通关记录状态标记为“完成”。</li>
+            </ul>
+            <h4>交互逻辑</h4>
+            <ul>
+              <li>点击“排行榜”按钮后，以弹窗形式展示记录列表。</li>
+              <li>点击“查看历史”按钮，打开当前学生的历史记录明细弹窗。</li>
+              <li>当记录为空时，需要展示明确空状态提示，避免教师误判系统异常。</li>
+            </ul>
+          </article>
+
+          <article class="prd-section prd-anchor" id="prd-flow">
+            <h2>3. 业务流程</h2>
+            <p>业务流程围绕“发起活动 → 学生作答 → 结果沉淀”展开，既要保证课堂节奏顺畅，也要保证数据闭环完整。</p>
+          </article>
+
+          <article class="prd-section prd-anchor" id="prd-start-flow">
+            <h3>3.1 发起流程</h3>
+            <ol>
+              <li>教师进入活动页。</li>
+              <li>系统展示活动设置弹窗。</li>
+              <li>教师选择难度与班级。</li>
+              <li>教师选择作答模式：随机点名或指定学生。</li>
+              <li>若随机点名，则执行抽取；若指定学生，则选择具体学生。</li>
+              <li>教师点击“开始活动”。</li>
+              <li>系统校验通过后关闭设置弹窗，进入活动进行中状态。</li>
+            </ol>
+          </article>
+
+          <article class="prd-section prd-anchor" id="prd-answer-flow">
+            <h3>3.2 作答流程</h3>
+            <ol>
+              <li>系统根据难度生成算式牌和结果牌并开始计时。</li>
+              <li>学生拖拽算式牌到结果牌。</li>
+              <li>系统判断匹配是否正确，并给出成功或失败反馈。</li>
+              <li>正确则更新正确数、得分率并移除算式；错误则保留题目继续作答。</li>
+              <li>教师可在任意时刻暂停、恢复或结束活动。</li>
+              <li>当所有题目匹配完成时，活动自动判定为通关。</li>
+            </ol>
+          </article>
+
+          <article class="prd-section prd-anchor" id="prd-data-flow">
+            <h3>3.3 结果沉淀流程</h3>
+            <ol>
+              <li>通关或用户点击“结束活动”时生成一条成绩记录。</li>
+              <li>记录需要存储，用于排行榜与学生历史展示。</li>
+              <li>排行榜从所有记录中提取“同班级 + 同学生 + 同难度（也就是难度）”的最新成绩进行展示。</li>
+              <li>历史记录则按完成时间倒序呈现全部作答轨迹。</li>
+              <li>教师可继续发起下一轮活动，实现课堂连续使用。</li>
+            </ol>
+          </article>
+        </div>
+      </section>
+    </div>
+  </div>
+
+
+  <script>
+    class MathBlockGame {
+      constructor() {
+        this.results = [4, 6, 8, 9, 12, 14, 15, 16, 18, 20, 21, 24, 25, 27, 28, 30, 32, 35, 36, 40, 42, 45, 48, 49, 54, 56, 63, 64, 72, 81];
+        this.expressionTemplates = {
+          4: ["2 × 2"],
+          6: ["2 × 3"],
+          8: ["2 × 4"],
+          9: ["3 × 3"],
+          12: ["2 × 6", "3 × 4"],
+          14: ["2 × 7"],
+          15: ["3 × 5"],
+          16: ["2 × 8", "4 × 4"],
+          18: ["3 × 6", "2 × 9"],
+          20: ["4 × 5"],
+          21: ["3 × 7"],
+          24: ["4 × 6", "8 × 3"],
+          25: ["5 × 5"],
+          27: ["3 × 9"],
+          28: ["4 × 7"],
+          30: ["5 × 6"],
+          32: ["4 × 8"],
+          35: ["5 × 7"],
+          36: ["6 × 6", "4 × 9"],
+          40: ["5 × 8"],
+          42: ["7 × 6"],
+          45: ["5 × 9"],
+          48: ["6 × 8"],
+          49: ["7 × 7"],
+          54: ["6 × 9"],
+          56: ["7 × 8"],
+          63: ["7 × 9"],
+          64: ["8 × 8"],
+          72: ["8 × 9"],
+          81: ["9 × 9"]
+        };
+
+        this.storageKeys = {
+          roster: "mathBlockRoster",
+          leaderboard: "mathBlockLeaderboard",
+          currentStudent: "mathBlockCurrentStudent",
+          currentClass: "mathBlockCurrentClass"
+        };
+
+        this.expressions = [];
+        this.correct = 0;
+        this.elapsedMs = 0;
+        this.timerSegmentStart = null;
+        this.gameTimer = null;
+        this.draggedElement = null;
+        this.draggedData = null;
+        this.gameStarted = false;
+        this.gamePaused = false;
+        this.setupVisible = true;
+        this.resizeTimer = null;
+        this.toastTimer = null;
+        this.rollCallTimer = null;
+        this.rollCallAnimationRunning = false;
+        this.selectedStartMode = "random";
+        this.pendingStartStudent = "";
+        this.pendingRollCallStudent = "";
+        this.currentStudent = localStorage.getItem(this.storageKeys.currentStudent) || "";
+        this.currentClass = localStorage.getItem(this.storageKeys.currentClass) || "";
+        this.rosterMap = {};
+        this.leaderboardSort = { key: "rank", direction: "desc" };
+        this.activeHistoryTarget = null;
+        this.defaultRosterMap = {
+          "三年级1班": ["李浩然","王梓涵","张宇轩","陈雨桐","刘子墨","黄思涵","赵俊熙","周语桐","吴昊然","徐梓萌","孙晨曦","马嘉悦","朱奕辰","胡诗涵","郭景程","何欣怡","高一诺","林泽宇","罗可馨","郑皓轩","谢雨泽","梁欣妍","宋嘉诚","唐语彤"]
+        };
+
+        this.cacheElements();
+        this.loadRoster();
+        this.initializeGame();
+        this.bindEvents();
+      }
+
+      cacheElements() {
+        this.gameArea = document.getElementById("gameArea");
+        this.expressionBlocksEl = document.getElementById("expressionBlocks");
+        this.resultCardsEl = document.getElementById("resultCardsContainer");
+        this.expressionZoneEl = document.getElementById("expressionZone");
+        this.expressionZoneLabelEl = document.getElementById("expressionZoneLabel");
+        this.overlayEl = document.getElementById("gameOverlay");
+        this.overlayTextEl = document.getElementById("overlayText");
+        this.toastEl = document.getElementById("toast");
+        this.expressionCountEl = document.getElementById("expressionCount");
+        this.pauseBtnEl = document.getElementById("pauseBtn");
+        this.endBtnEl = document.getElementById("endBtn");
+        this.restartBtnEl = document.getElementById("restartBtn");
+        this.currentPlayerPanelEl = document.getElementById("currentPlayerPanel");
+        this.gameStatsPanelEl = document.getElementById("gameStatsPanel");
+        this.currentStudentNameEl = document.getElementById("currentStudentName");
+        this.setupModalEl = document.getElementById("setupModal");
+        this.setupClassSelectEl = document.getElementById("setupClassSelect");
+        this.setupSelectedStudentEl = document.getElementById("setupSelectedStudent");
+        this.setupManualPanelEl = document.getElementById("setupManualPanel");
+        this.setupRandomPanelEl = document.getElementById("setupRandomPanel");
+        this.setupManualStudentSelectEl = document.getElementById("setupManualStudentSelect");
+        this.modeOptionRandomEl = document.getElementById("modeOptionRandom");
+        this.modeOptionManualEl = document.getElementById("modeOptionManual");
+        this.modeRadioEls = document.querySelectorAll('input[name="answerMode"]');
+        this.leaderboardClassFilterEl = document.getElementById("leaderboardClassFilter");
+        this.leaderboardFilterEl = document.getElementById("leaderboardFilter");
+        this.leaderboardBodyEl = document.getElementById("leaderboardBody");
+        this.historyModalEl = document.getElementById("historyModal");
+        this.historyBodyEl = document.getElementById("historyBody");
+        this.historySummaryEl = document.getElementById("historySummary");
+        this.historyEmptyEl = document.getElementById("historyEmpty");
+      }
+
+      initializeGame() {
+        this.createExpressionDeck();
+        this.renderAll();
+        this.updateSetupModalBounds();
+        this.updateUI();
+        this.setGameDisabled(true);
+        this.updateCurrentStudentUI();
+        this.setOverlayState(true, "请先完成活动设置后开始挑战！");
+        this.showSetupModal();
+        this.syncControlButtons();
+      }
+
+      bindEvents() {
+        this.expressionBlocksEl.addEventListener("dragstart", (e) => {
+          const block = e.target.closest(".expression-block");
+          if (!block || block.classList.contains("disabled")) return;
+          this.draggedElement = block;
+          this.draggedData = {
+            id: Number(block.dataset.id),
+            answer: Number(block.dataset.answer),
+            expression: block.querySelector(".mahjong-front").textContent.trim()
+          };
+          block.classList.add("dragging");
+          if (e.dataTransfer) {
+            e.dataTransfer.setData("text/plain", String(this.draggedData.id));
+            e.dataTransfer.effectAllowed = "move";
+          }
+        });
+
+        this.expressionBlocksEl.addEventListener("dragend", (e) => {
+          const block = e.target.closest(".expression-block");
+          if (!block) return;
+          block.classList.remove("dragging");
+          this.clearAllDragOver();
+        });
+
+        this.resultCardsEl.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          const card = e.target.closest(".result-card");
+          if (!card || card.classList.contains("disabled")) return;
+          card.classList.add("drag-over");
+          if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
+        });
+
+        this.resultCardsEl.addEventListener("dragleave", (e) => {
+          const card = e.target.closest(".result-card");
+          if (card) card.classList.remove("drag-over");
+        });
+
+        this.resultCardsEl.addEventListener("drop", (e) => {
+          e.preventDefault();
+          const card = e.target.closest(".result-card");
+          if (!card || card.classList.contains("disabled")) return;
+          card.classList.remove("drag-over");
+          this.handleDrop(card);
+        });
+
+        this.expressionCountEl?.addEventListener("change", () => this.handleExpressionCountChange());
+        this.setupClassSelectEl?.addEventListener("change", () => this.handleRosterClassSelection());
+        this.setupManualStudentSelectEl?.addEventListener("change", () => this.handleManualStudentChange());
+        this.modeRadioEls.forEach((radio) => {
+          radio.addEventListener("change", () => this.applySetupMode(radio.value));
+        });
+
+        this.leaderboardBodyEl?.addEventListener("click", (e) => {
+          const historyBtn = e.target.closest("[data-history-student]");
+          if (!historyBtn) return;
+          const student = decodeURIComponent(historyBtn.dataset.historyStudent || "");
+          const className = decodeURIComponent(historyBtn.dataset.historyClass || "");
+          const expressionCount = Number(historyBtn.dataset.historyExpressionCount || 0);
+          this.openHistoryModal(student, className, expressionCount);
+        });
+
+        window.addEventListener("resize", () => {
+          clearTimeout(this.resizeTimer);
+          this.resizeTimer = setTimeout(() => {
+            this.renderAll();
+            this.updateSetupModalBounds();
+            this.setGameDisabled(!this.gameStarted || this.gamePaused);
+          }, 120);
+        });
+
+        document.addEventListener("keydown", (e) => {
+          if (e.key === "Escape") {
+            closePrdModal();
+            this.closeRollCallModal();
+            this.closeHistoryModal();
+            closeLeaderboardModal();
+          }
+        });
+      }
+
+      updateSetupModalBounds() {
+        if (!this.setupModalEl || !this.gameArea) return;
+        const rect = this.gameArea.getBoundingClientRect();
+        this.setupModalEl.style.top = `${rect.top}px`;
+        this.setupModalEl.style.left = `${rect.left}px`;
+        this.setupModalEl.style.width = `${rect.width}px`;
+        this.setupModalEl.style.height = `${rect.height}px`;
+      }
+
+      initializeSetupSelections() {
+        const availableClass = this.currentClass && this.rosterMap[this.currentClass] ? this.currentClass : (Object.keys(this.rosterMap)[0] || "三年级1班");
+        if (this.setupClassSelectEl) this.setupClassSelectEl.value = availableClass;
+        this.currentClass = availableClass;
+        this.populateManualStudentOptions();
+        this.applySetupMode(this.getSelectedMode());
+      }
+
+      getSelectedMode() {
+        const checked = Array.from(this.modeRadioEls || []).find((item) => item.checked);
+        return checked ? checked.value : this.selectedStartMode || "random";
+      }
+
+      showSetupModal() {
+        this.setupVisible = true;
+        this.updateSetupModalBounds();
+        this.setupModalEl?.classList.add("show");
+        this.initializeSetupSelections();
+        this.pendingStartStudent = "";
+        this.pendingRollCallStudent = "";
+        this.updateSetupSelectedStudent();
+        this.syncHeaderPanels();
+      }
+
+      hideSetupModal() {
+        this.setupVisible = false;
+        this.setupModalEl?.classList.remove("show");
+        this.syncHeaderPanels();
+      }
+
+      syncHeaderPanels() {
+        const show = !this.setupVisible;
+        this.currentPlayerPanelEl?.classList.toggle("hidden-control", !show);
+        this.gameStatsPanelEl?.classList.toggle("hidden-control", !show);
+      }
+
+      handleExpressionCountChange() {
+        if (this.gameStarted) {
+          this.showToast("活动进行中，难度将在重新开始后生效", "error");
+          return;
+        }
+        this.createExpressionDeck();
+        this.renderAll();
+        this.updateUI();
+      }
+
+      handleRosterClassSelection() {
+        const className = this.setupClassSelectEl?.value?.trim() || "三年级1班";
+        this.currentClass = className;
+        this.pendingStartStudent = "";
+        this.populateManualStudentOptions();
+        this.updateSetupSelectedStudent();
+      }
+
+      handleManualStudentChange() {
+        this.pendingStartStudent = this.setupManualStudentSelectEl?.value || "";
+        this.updateSetupSelectedStudent();
+      }
+
+      applySetupMode(mode = "random") {
+        this.selectedStartMode = mode;
+        this.modeOptionRandomEl?.classList.toggle("active", mode === "random");
+        this.modeOptionManualEl?.classList.toggle("active", mode === "manual");
+        this.setupRandomPanelEl?.classList.toggle("hidden-control", mode !== "random");
+        this.setupManualPanelEl?.classList.toggle("hidden-control", mode !== "manual");
+        this.populateManualStudentOptions();
+        this.pendingStartStudent = mode === "manual" ? (this.setupManualStudentSelectEl?.value || "") : "";
+        this.updateSetupSelectedStudent();
+      }
+
+      updateSetupSelectedStudent() {
+        if (!this.setupSelectedStudentEl) return;
+        this.setupSelectedStudentEl.textContent = this.pendingStartStudent || (this.selectedStartMode === "random" ? "未抽取学生" : "未选择学生");
+      }
+
+      getDraftClassName() {
+        return (this.setupClassSelectEl?.value || "三年级1班").trim();
+      }
+
+      getSetupRosterList() {
+        const className = this.getDraftClassName();
+        return [...(this.defaultRosterMap[className] || [])];
+      }
+
+      populateClassOptions(preferredClass = "") {
+        const sortZh = (a, b) => a.localeCompare(b, "zh-Hans-CN");
+        const rosterClasses = Object.keys(this.rosterMap).sort(sortZh);
+        const recordClasses = [...new Set(this.getLeaderboardRecords().map(item => item.className).filter(Boolean))].sort(sortZh);
+        const allClasses = [...new Set([...rosterClasses, ...recordClasses])].sort(sortZh);
+        if (this.setupClassSelectEl) {
+          const currentValue = preferredClass || this.setupClassSelectEl.value || rosterClasses[0] || "三年级1班";
+          this.setupClassSelectEl.innerHTML = rosterClasses.map(name => `<option value="${name}">${name}</option>`).join("");
+          this.setupClassSelectEl.value = rosterClasses.includes(currentValue) ? currentValue : (rosterClasses[0] || "三年级1班");
+        }
+        if (this.leaderboardClassFilterEl) {
+          const currentFilter = this.leaderboardClassFilterEl.value || "all";
+          this.leaderboardClassFilterEl.innerHTML = '<option value="all">全部班级</option>' + allClasses.map(name => `<option value="${name}">${name}</option>`).join("");
+          this.leaderboardClassFilterEl.value = allClasses.includes(currentFilter) ? currentFilter : "all";
+        }
+      }
+
+      populateManualStudentOptions(preferred = "") {
+        const list = this.getSetupRosterList();
+        if (!this.setupManualStudentSelectEl) return;
+        const currentValue = preferred || this.setupManualStudentSelectEl.value || this.pendingStartStudent;
+        this.setupManualStudentSelectEl.innerHTML = '<option value="">请选择学生</option>' + list.map(name => `<option value="${this.escapeHtml(name)}">${this.escapeHtml(name)}</option>`).join("");
+        this.setupManualStudentSelectEl.value = list.includes(currentValue) ? currentValue : "";
+      }
+
+      loadRoster() {
+        this.rosterMap = Object.fromEntries(Object.entries(this.defaultRosterMap).map(([key, value]) => [key, value.join("\n")]));
+        this.populateClassOptions(this.currentClass || "三年级1班");
+        this.initializeSetupSelections();
+      }
+
+      drawSetupStudent() {
+        const list = this.getSetupRosterList();
+        if (!list.length) {
+          this.showToast("当前班级暂无学生名单", "error");
+          return;
+        }
+        const student = list[Math.floor(Math.random() * list.length)];
+        this.pendingStartStudent = student;
+        this.updateSetupSelectedStudent();
+        this.showToast(`已抽中：${student}`, "success");
+      }
+
+      startGame() {
+        if (this.gameStarted) return;
+        const className = this.getDraftClassName();
+        const rosterList = this.getSetupRosterList();
+        let studentName = "";
+        if (this.selectedStartMode === "random") {
+          studentName = (this.pendingStartStudent || "").trim();
+          if (!studentName) {
+            this.showToast("请先随机抽取学生", "error");
+            return;
+          }
+        } else {
+          studentName = (this.setupManualStudentSelectEl?.value || "").trim();
+          if (!studentName) {
+            this.showToast("请选择开始作答的学生", "error");
+            return;
+          }
+          this.pendingStartStudent = studentName;
+        }
+        this.currentStudent = studentName;
+        this.currentClass = className;
+        localStorage.setItem(this.storageKeys.currentStudent, this.currentStudent);
+        localStorage.setItem(this.storageKeys.currentClass, this.currentClass);
+        this.correct = 0;
+        this.elapsedMs = 0;
+        this.timerSegmentStart = Date.now();
+        this.gameStarted = true;
+        this.gamePaused = false;
+        this.draggedElement = null;
+        this.draggedData = null;
+        document.getElementById("victoryScreen")?.classList.remove("show");
+        this.createExpressionDeck();
+        this.renderAll();
+        this.updateUI();
+        this.updateCurrentStudentUI();
+        this.hideSetupModal();
+        this.setOverlayState(false);
+        this.setGameDisabled(false);
+        this.startTimer();
+        this.syncControlButtons();
+        this.showToast(`${className} · ${studentName} 开始作答`, "success");
+      }
+
+      syncControlButtons() {
+        const playing = this.gameStarted;
+        if (this.pauseBtnEl) {
+          this.pauseBtnEl.disabled = !playing;
+          this.pauseBtnEl.textContent = this.gamePaused ? "▶继续活动" : "⏸暂停活动";
+          this.pauseBtnEl.classList.toggle("hidden-control", !playing);
+        }
+        if (this.endBtnEl) {
+          this.endBtnEl.disabled = !playing;
+          this.endBtnEl.classList.toggle("hidden-control", !playing);
+        }
+        if (this.restartBtnEl) this.restartBtnEl.classList.toggle("hidden-control", !playing);
+      }
+
+      openRollCallModal() {
+        this.drawSetupStudent();
+      }
+
+      closeRollCallModal() {
+        return;
+      }
+
+      drawStudent() {
+        this.drawSetupStudent();
+      }
+
+      confirmRollCallStudent() {
+        return;
+      }
+
+      setGameDisabled(disabled) {
+        document.querySelectorAll(".expression-block").forEach(block => {
+          block.draggable = !disabled;
+          block.classList.toggle("disabled", disabled);
+        });
+        document.querySelectorAll(".result-card").forEach(card => card.classList.toggle("disabled", disabled));
+      }
+
+      setOverlayState(show, text = "") {
+        if (!this.overlayEl) return;
+        this.overlayEl.classList.toggle("hidden", !show);
+        if (text && this.overlayTextEl) this.overlayTextEl.textContent = text;
+      }
+
+      startTimer() {
+        this.stopTimer();
+        this.updateTimerDisplay();
+        this.gameTimer = setInterval(() => this.updateTimerDisplay(), 200);
+      }
+
+      stopTimer() {
+        if (this.gameTimer) {
+          clearInterval(this.gameTimer);
+          this.gameTimer = null;
+        }
+      }
+
+      captureElapsedTime() {
+        if (this.timerSegmentStart) {
+          this.elapsedMs += Date.now() - this.timerSegmentStart;
+          this.timerSegmentStart = null;
+        }
+      }
+
+      getElapsedSeconds() {
+        const runningMs = this.timerSegmentStart ? Date.now() - this.timerSegmentStart : 0;
+        return Math.floor((this.elapsedMs + runningMs) / 1000);
+      }
+
+      updateTimerDisplay() {
+        const elapsed = this.getElapsedSeconds();
+        const hours = Math.floor(elapsed / 3600);
+        const minutes = Math.floor((elapsed % 3600) / 60);
+        const seconds = elapsed % 60;
+        document.getElementById("timer").textContent = `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+      }
+
+      togglePause() {
+        if (!this.gameStarted) return;
+        if (this.gamePaused) this.resumeGame(); else this.pauseGame();
+      }
+
+      pauseGame() {
+        if (!this.gameStarted || this.gamePaused) return;
+        this.captureElapsedTime();
+        this.gamePaused = true;
+        this.stopTimer();
+        this.setGameDisabled(true);
+        this.setOverlayState(true, "活动已暂停，点击“继续活动”继续挑战！");
+        this.syncControlButtons();
+        this.showToast("活动已暂停", "success");
+      }
+
+      resumeGame() {
+        if (!this.gameStarted || !this.gamePaused) return;
+        this.gamePaused = false;
+        this.timerSegmentStart = Date.now();
+        this.setOverlayState(false);
+        this.setGameDisabled(false);
+        this.startTimer();
+        this.syncControlButtons();
+        this.showToast("活动已继续", "success");
+      }
+
+      endGame() {
+        if (!this.gameStarted) return;
+        if (!confirm("确定要结束当前活动吗？结束后本轮数据会计入排行榜。")) return;
+        this.captureElapsedTime();
+        this.stopTimer();
+        this.saveLeaderboardRecord(this.createLeaderboardRecord("结束"));
+        this.restart(false);
+        this.showToast("当前活动已结束，数据已计入排行榜", "success");
+      }
+
+      restart(showToast = false) {
+        this.stopTimer();
+        this.correct = 0;
+        this.elapsedMs = 0;
+        this.timerSegmentStart = null;
+        this.draggedElement = null;
+        this.draggedData = null;
+        this.gameStarted = false;
+        this.gamePaused = false;
+        document.getElementById("victoryScreen")?.classList.remove("show");
+        document.getElementById("timer").textContent = "00:00:00";
+        this.createExpressionDeck();
+        this.renderAll();
+        this.updateUI();
+        this.setGameDisabled(true);
+        this.setOverlayState(true, "请先完成活动设置后开始挑战！");
+        this.showSetupModal();
+        this.syncControlButtons();
+        if (showToast) this.showToast("活动已重置，请重新设置后开始", "success");
+      }
+
+      getSelectedExpressionCount() {
+        return parseInt(this.expressionCountEl?.value || "18", 10);
+      }
+
+      createExpressionDeck() {
+        this.expressions = [];
+        let id = 0;
+        const selectedCount = this.getSelectedExpressionCount();
+        const allExpressions = [];
+        this.results.forEach((answer) => {
+          (this.expressionTemplates[answer] || []).forEach((text) => {
+            allExpressions.push({ id: id++, expression: text, answer, solved: false });
+          });
+        });
+        const shuffled = this.shuffleArray(allExpressions);
+        this.expressions = shuffled.slice(0, selectedCount);
+        this.expressions.forEach((expr, index) => { expr.id = index; });
+      }
+
+      getLayoutConfig() {
+        const areaRect = this.gameArea.getBoundingClientRect();
+        const areaW = areaRect.width;
+        const areaH = areaRect.height;
+        const isMobile = areaW <= 768;
+        const cardWidth = this.clamp(areaW * (isMobile ? 0.17 : 0.09), isMobile ? 86 : 112, isMobile ? 110 : 148);
+        const cardHeight = this.clamp(areaH * (isMobile ? 0.14 : 0.16), isMobile ? 76 : 92, isMobile ? 94 : 120);
+        const laneX = this.clamp(cardWidth + (isMobile ? 18 : 30), 110, 200);
+        const laneY = this.clamp(cardHeight + (isMobile ? 14 : 24), 96, 180);
+        const regionLeft = laneX;
+        const regionTop = laneY;
+        const regionWidth = Math.max(areaW - laneX * 2, areaW * 0.42);
+        const regionHeight = Math.max(areaH - laneY * 2, areaH * 0.34);
+        const blockWidth = this.clamp(regionWidth / (isMobile ? 3.1 : 5.3), isMobile ? 82 : 114, isMobile ? 108 : 146);
+        const blockHeight = this.clamp(regionHeight / (isMobile ? 4.6 : 3.8), isMobile ? 58 : 72, isMobile ? 76 : 88);
+        return { areaW, areaH, cardWidth, cardHeight, blockWidth, blockHeight, regionLeft, regionTop, regionWidth, regionHeight, edgePadding: isMobile ? 12 : 20 };
+      }
+
+      renderAll() {
+        const layout = this.getLayoutConfig();
+        this.renderExpressionZone(layout);
+        this.renderResultCards(layout);
+        this.renderExpressionBlocks(layout);
+      }
+
+      renderExpressionZone(layout) {
+        const totalCount = this.getSelectedExpressionCount();
+        this.expressionZoneEl.style.left = layout.regionLeft + "px";
+        this.expressionZoneEl.style.top = layout.regionTop + "px";
+        this.expressionZoneEl.style.width = layout.regionWidth + "px";
+        this.expressionZoneEl.style.height = layout.regionHeight + "px";
+        this.expressionZoneLabelEl.style.left = (layout.regionLeft + 16) + "px";
+        this.expressionZoneLabelEl.style.top = (layout.regionTop + 10) + "px";
+        this.expressionZoneLabelEl.textContent = `待匹配算式区（共 ${totalCount} 题）`;
+      }
+
+      renderResultCards(layout) {
+        this.resultCardsEl.innerHTML = "";
+        const uniqueAnswers = [...new Set(this.expressions.map(expr => expr.answer))];
+        const positions = this.generatePerimeterPositions(layout.areaW, layout.areaH, layout.cardWidth, layout.cardHeight, uniqueAnswers.length, layout.edgePadding);
+        uniqueAnswers.forEach((result, index) => {
+          const pos = positions[index];
+          const card = document.createElement("div");
+          card.className = "result-card";
+          card.dataset.result = result;
+          card.style.left = pos.x + "px";
+          card.style.top = pos.y + "px";
+          card.style.width = pos.width + "px";
+          card.style.height = pos.height + "px";
+          card.innerHTML = `<div class="wooden-sign"><div class="wooden-board">= ${result}<div class="wooden-stake top-left"></div><div class="wooden-stake top-right"></div><div class="wooden-stake bottom-left"></div><div class="wooden-stake bottom-right"></div></div></div>`;
+          this.resultCardsEl.appendChild(card);
+        });
+        if (!this.gameStarted) this.setGameDisabled(true);
+      }
+
+      renderExpressionBlocks(layout) {
+        this.expressionBlocksEl.innerHTML = "";
+        this.expressionBlocksEl.style.left = layout.regionLeft + "px";
+        this.expressionBlocksEl.style.top = layout.regionTop + "px";
+        this.expressionBlocksEl.style.width = layout.regionWidth + "px";
+        this.expressionBlocksEl.style.height = layout.regionHeight + "px";
+        const unsolved = this.expressions.filter(item => !item.solved);
+        const positions = this.generateCenterGridPositions(layout.regionWidth, layout.regionHeight, layout.blockWidth, layout.blockHeight, unsolved.length);
+        unsolved.forEach((expr, index) => {
+          const pos = positions[index];
+          const block = document.createElement("div");
+          block.className = "expression-block";
+          block.draggable = this.gameStarted;
+          block.dataset.id = expr.id;
+          block.dataset.answer = expr.answer;
+          block.style.left = pos.x + "px";
+          block.style.top = pos.y + "px";
+          block.style.width = pos.width + "px";
+          block.style.height = pos.height + "px";
+          block.innerHTML = `<div class="mahjong-block"><div class="mahjong-shadow"></div><div class="mahjong-face mahjong-top"></div><div class="mahjong-face mahjong-right"></div><div class="mahjong-face mahjong-front">${expr.expression}</div></div>`;
+          if (!this.gameStarted) block.classList.add("disabled");
+          this.expressionBlocksEl.appendChild(block);
+        });
+      }
+
+      generatePerimeterPositions(areaW, areaH, cardW, cardH, count, padding = 20) {
+        const left = padding, top = padding, right = areaW - padding - cardW, bottom = areaH - padding - cardH;
+        const centerLeft = left + cardW / 2, centerTop = top + cardH / 2, centerRight = right + cardW / 2, centerBottom = bottom + cardH / 2;
+        const horizontal = Math.max(40, centerRight - centerLeft), vertical = Math.max(40, centerBottom - centerTop), perimeter = 2 * (horizontal + vertical);
+        const positions = [];
+        for (let i = 0; i < count; i++) {
+          let d = ((i + 0.5) / count) * perimeter, cx = centerLeft, cy = centerTop;
+          if (d <= horizontal) { cx = centerLeft + d; cy = centerTop; }
+          else if (d <= horizontal + vertical) { d -= horizontal; cx = centerRight; cy = centerTop + d; }
+          else if (d <= horizontal * 2 + vertical) { d -= (horizontal + vertical); cx = centerRight - d; cy = centerBottom; }
+          else { d -= (horizontal * 2 + vertical); cx = centerLeft; cy = centerBottom - d; }
+          positions.push({ x: Math.round(cx - cardW / 2), y: Math.round(cy - cardH / 2), width: Math.round(cardW), height: Math.round(cardH) });
+        }
+        return positions;
+      }
+
+      generateCenterGridPositions(regionW, regionH, blockW, blockH, count) {
+        if (count === 0) return [];
+        const gapX = Math.max(12, Math.min(24, Math.round(blockW * 0.14)));
+        const gapY = Math.max(12, Math.min(20, Math.round(blockH * 0.18)));
+        let bestCols = 1, bestRows = count, bestScore = Infinity;
+        for (let cols = 1; cols <= count; cols++) {
+          const rows = Math.ceil(count / cols);
+          const totalW = cols * blockW + (cols - 1) * gapX;
+          const totalH = rows * blockH + (rows - 1) * gapY;
+          if (totalW <= regionW - 10 && totalH <= regionH - 10) {
+            const score = Math.abs((cols / rows) - (regionW / regionH)) * 10 + (cols * rows - count);
+            if (score < bestScore) { bestScore = score; bestCols = cols; bestRows = rows; }
+          }
+        }
+        const totalW = bestCols * blockW + (bestCols - 1) * gapX;
+        const totalH = bestRows * blockH + (bestRows - 1) * gapY;
+        const startX = Math.max(0, (regionW - totalW) / 2);
+        const startY = Math.max(0, (regionH - totalH) / 2 + 6);
+        const positions = [];
+        for (let i = 0; i < count; i++) {
+          const row = Math.floor(i / bestCols), col = i % bestCols;
+          positions.push({ x: Math.round(startX + col * (blockW + gapX)), y: Math.round(startY + row * (blockH + gapY)), width: Math.round(blockW), height: Math.round(blockH) });
+        }
+        return positions;
+      }
+
+      clearAllDragOver() {
+        document.querySelectorAll(".result-card.drag-over").forEach(card => card.classList.remove("drag-over"));
+      }
+
+      handleDrop(resultCard) {
+        if (!this.draggedData || !this.draggedElement) return;
+        const resultValue = Number(resultCard.dataset.result);
+        const isCorrect = this.draggedData.answer === resultValue;
+        if (isCorrect) {
+          const expr = this.expressions.find(item => item.id === this.draggedData.id);
+          if (expr) expr.solved = true;
+          this.correct += 1;
+          this.draggedElement.classList.add("correct-drop");
+          resultCard.classList.add("correct-match");
+          this.showToast(`答对了！${this.draggedData.expression} = ${resultValue}`, "success");
+          this.createSuccessEffect(resultCard);
+          setTimeout(() => {
+            if (this.draggedElement && this.draggedElement.parentNode) this.draggedElement.remove();
+            resultCard.classList.remove("correct-match");
+            this.draggedElement = null;
+            this.draggedData = null;
+            this.updateUI();
+            this.checkVictory();
+          }, 700);
+        } else {
+          this.draggedElement.classList.add("wrong-drop");
+          resultCard.classList.add("wrong-match");
+          this.showToast(`不对哦，${this.draggedData.expression} 不是 ${resultValue}`, "error");
+          setTimeout(() => {
+            if (this.draggedElement) this.draggedElement.classList.remove("wrong-drop");
+            resultCard.classList.remove("wrong-match");
+            this.draggedElement = null;
+            this.draggedData = null;
+            this.updateUI();
+          }, 450);
+        }
+      }
+
+      createSuccessEffect(element) {
+        const rect = element.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2, cy = rect.top + rect.height / 2;
+        for (let i = 0; i < 14; i++) {
+          const particle = document.createElement("div");
+          particle.className = "success-particle";
+          const angle = (Math.PI * 2 * i) / 14;
+          const distance = 50 + Math.random() * 28;
+          particle.style.left = cx + "px";
+          particle.style.top = cy + "px";
+          particle.style.setProperty("--dx", `${Math.cos(angle) * distance}px`);
+          particle.style.setProperty("--dy", `${Math.sin(angle) * distance}px`);
+          document.body.appendChild(particle);
+          setTimeout(() => particle.remove(), 950);
+        }
+      }
+
+      showToast(message, type) {
+        if (!this.toastEl) return;
+        this.toastEl.textContent = message;
+        this.toastEl.className = `toast ${type} show`;
+        clearTimeout(this.toastTimer);
+        this.toastTimer = setTimeout(() => this.toastEl.classList.remove("show"), 1300);
+      }
+
+      getScoreRate() {
+        const totalExpressions = this.getSelectedExpressionCount();
+        return totalExpressions ? Math.round((this.correct / totalExpressions) * 100) : 0;
+      }
+
+      getDifficultyLabel(count) {
+        const difficultyMap = {
+          9: "简单",
+          18: "较易",
+          27: "普通",
+          36: "困难",
+          45: "特难"
+        };
+        return difficultyMap[Number(count)] || `${count}题`;
+      }
+
+      updateUI() {
+        document.getElementById("scoreRate").textContent = `${this.getScoreRate()}%`;
+        document.getElementById("correct").textContent = this.correct;
+      }
+
+      updateCurrentStudentUI() {
+        if (this.currentStudentNameEl) this.currentStudentNameEl.textContent = this.currentStudent || "未点名";
+      }
+
+      checkVictory() {
+        if (!this.expressions.every(item => item.solved)) return;
+        this.captureElapsedTime();
+        this.stopTimer();
+        this.gameStarted = false;
+        this.gamePaused = false;
+        this.setGameDisabled(true);
+        this.setOverlayState(true, "本轮已完成，点击“重新开始”可重新设置挑战！");
+        this.updateTimerDisplay();
+        this.syncControlButtons();
+        const record = this.createLeaderboardRecord("完成");
+        document.getElementById("finalStudent").textContent = `${record.className} · ${record.student}`;
+        document.getElementById("finalScoreRate").textContent = `${record.scoreRate}%`;
+        document.getElementById("finalTime").textContent = this.formatTime(record.seconds);
+        document.getElementById("finalCorrect").textContent = record.correctCount;
+        document.getElementById("finalExpressionCount").textContent = this.getDifficultyLabel(record.expressionCount);
+        this.saveLeaderboardRecord(record);
+        setTimeout(() => document.getElementById("victoryScreen")?.classList.add("show"), 350);
+      }
+
+      createLeaderboardRecord(status = "完成") {
+        return { student: this.currentStudent || "未点名", className: this.currentClass || "未分班", expressionCount: this.getSelectedExpressionCount(), seconds: this.getElapsedSeconds(), scoreRate: this.getScoreRate(), correctCount: this.correct, status, finishedAt: Date.now() };
+      }
+
+      formatTime(seconds) {
+        return `${Math.floor(seconds / 60)}分${seconds % 60}秒`;
+      }
+
+      formatClock(seconds) {
+        const hours = Math.floor(seconds / 3600), minutes = Math.floor((seconds % 3600) / 60), secs = seconds % 60;
+        return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+      }
+
+      normalizeLeaderboardRecord(record) {
+        const expressionCount = Number(record.expressionCount || 0);
+        let correctCount = Number(record.correctCount);
+        if (!Number.isFinite(correctCount)) correctCount = Number.isFinite(Number(record.score)) && Number(record.score) > 0 ? Math.round(Number(record.score) / 100) : 0;
+        let scoreRate = Number(record.scoreRate);
+        if (!Number.isFinite(scoreRate)) scoreRate = expressionCount ? Math.round((correctCount / expressionCount) * 100) : 0;
+        return { student: String(record.student || "未点名"), className: String(record.className || record.class || "未分班"), expressionCount, seconds: Number(record.seconds || 0), scoreRate, correctCount, status: record.status || "完成", finishedAt: Number(record.finishedAt || Date.now()) };
+      }
+
+      getLeaderboardRecords() {
+        try {
+          const raw = localStorage.getItem(this.storageKeys.leaderboard);
+          const parsed = raw ? JSON.parse(raw) : [];
+          return Array.isArray(parsed) ? parsed.map(item => this.normalizeLeaderboardRecord(item)) : [];
+        } catch (error) {
+          return [];
+        }
+      }
+
+      saveLeaderboardRecord(record) {
+        const records = this.getLeaderboardRecords();
+        records.push(this.normalizeLeaderboardRecord(record));
+        localStorage.setItem(this.storageKeys.leaderboard, JSON.stringify(records));
+        this.populateClassOptions();
+      }
+
+      getLeaderboardLatestEntries() {
+        const latestMap = new Map();
+        this.getLeaderboardRecords().forEach((item) => {
+          const key = `${item.className || "未分班"}__${item.student || "未点名"}__${item.expressionCount || 0}`;
+          const existing = latestMap.get(key);
+          if (!existing || (item.finishedAt || 0) >= (existing.finishedAt || 0)) latestMap.set(key, item);
+        });
+        return Array.from(latestMap.values());
+      }
+
+      getStudentHistoryRecords(student, className, expressionCount = 0) {
+        const targetExpressionCount = Number(expressionCount || 0);
+        return this.getLeaderboardRecords().filter((item) => (item.student || "未点名") === student && (item.className || "未分班") === className && (!targetExpressionCount || Number(item.expressionCount || 0) === targetExpressionCount)).sort((a, b) => (b.finishedAt || 0) - (a.finishedAt || 0));
+      }
+
+      getDefaultSortDirection(key) {
+        return key === "seconds" ? "asc" : "desc";
+      }
+
+      changeLeaderboardSort(key) {
+        if (this.leaderboardSort.key === key) this.leaderboardSort.direction = this.leaderboardSort.direction === "desc" ? "asc" : "desc";
+        else { this.leaderboardSort.key = key; this.leaderboardSort.direction = this.getDefaultSortDirection(key); }
+        this.renderLeaderboard();
+      }
+
+      compareRankOrder(a, b) {
+        if ((b.scoreRate || 0) !== (a.scoreRate || 0)) return (b.scoreRate || 0) - (a.scoreRate || 0);
+        if ((a.seconds || 0) !== (b.seconds || 0)) return (a.seconds || 0) - (b.seconds || 0);
+        if ((b.correctCount || 0) !== (a.correctCount || 0)) return (b.correctCount || 0) - (a.correctCount || 0);
+        return (b.finishedAt || 0) - (a.finishedAt || 0);
+      }
+
+      sortLeaderboardEntries(entries) {
+        const { key, direction } = this.leaderboardSort;
+        return [...entries].sort((a, b) => {
+          let result = 0;
+          if (key === "rank") result = this.compareRankOrder(a, b);
+          else if (key === "seconds") result = (a.seconds || 0) - (b.seconds || 0);
+          else if (key === "scoreRate") result = (a.scoreRate || 0) - (b.scoreRate || 0);
+          else if (key === "correctCount") result = (a.correctCount || 0) - (b.correctCount || 0);
+          else if (key === "finishedAt") result = (a.finishedAt || 0) - (b.finishedAt || 0);
+          if (result === 0) result = this.compareRankOrder(a, b);
+          return direction === "asc" ? result : -result;
+        });
+      }
+
+      updateSortIndicators() {
+        ["rank", "seconds", "scoreRate", "correctCount", "finishedAt"].forEach((key) => {
+          const el = document.getElementById(`sortIndicator-${key}`);
+          if (!el) return;
+          el.textContent = this.leaderboardSort.key === key ? (this.leaderboardSort.direction === "desc" ? "↓" : "↑") : "↕";
+        });
+      }
+
+      renderLeaderboard() {
+        this.populateClassOptions();
+        const filterValue = this.leaderboardFilterEl?.value || "all";
+        const classFilterValue = this.leaderboardClassFilterEl?.value || "all";
+        const tbody = document.getElementById("leaderboardBody");
+        const empty = document.getElementById("leaderboardEmpty");
+        const summary = document.getElementById("leaderboardSummary");
+        if (!tbody || !empty || !summary) return;
+        const latestEntries = this.getLeaderboardLatestEntries();
+        const filtered = latestEntries.filter(item => (filterValue === "all" || String(item.expressionCount) === filterValue) && (classFilterValue === "all" || item.className === classFilterValue));
+        const sorted = this.sortLeaderboardEntries(filtered);
+        tbody.innerHTML = "";
+        this.updateSortIndicators();
+        if (!sorted.length) {
+          empty.style.display = "block";
+          const bits = [];
+          if (classFilterValue !== "all") bits.push(classFilterValue);
+          if (filterValue !== "all") bits.push(this.getDifficultyLabel(filterValue));
+          summary.textContent = bits.length ? `${bits.join(" · ")} 暂无历史记录` : "暂无历史记录";
+          return;
+        }
+        empty.style.display = "none";
+        const summaryBits = [];
+        if (classFilterValue !== "all") summaryBits.push(classFilterValue);
+        if (filterValue !== "all") summaryBits.push(this.getDifficultyLabel(filterValue));
+        summaryBits.push(`共 ${sorted.length} 名学生作答`);
+        summary.textContent = summaryBits.join(" · ");
+        sorted.forEach((item, index) => {
+          const studentText = item.student || "未点名";
+          const classText = item.className || "未分班";
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td><span class="rank-badge">${index + 1}</span></td>
+            <td>${this.escapeHtml(studentText)}</td>
+            <td>${this.escapeHtml(classText)}</td>
+            <td>${this.escapeHtml(this.getDifficultyLabel(item.expressionCount))}</td>
+            <td>${this.formatClock(item.seconds || 0)}</td>
+            <td>${this.escapeHtml(item.scoreRate || 0)}%</td>
+            <td>${this.escapeHtml(item.correctCount || 0)}</td>
+            <td>${this.escapeHtml(item.status || "完成")}</td>
+            <td>${this.formatDateTime(item.finishedAt)}</td>
+            <td><button class="action-btn" type="button" data-history-student="${encodeURIComponent(studentText)}" data-history-class="${encodeURIComponent(classText)}" data-history-expression-count="${Number(item.expressionCount || 0)}">查看历史</button></td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      openHistoryModal(student, className, expressionCount = 0) {
+        this.activeHistoryTarget = { student: student || "未点名", className: className || "未分班", expressionCount: Number(expressionCount || 0) };
+        this.renderHistoryModal();
+        this.historyModalEl?.classList.add("show");
+      }
+
+      renderHistoryModal() {
+        const target = this.activeHistoryTarget;
+        if (!target || !this.historyBodyEl || !this.historySummaryEl || !this.historyEmptyEl) return;
+        const expressionLabel = target.expressionCount ? this.getDifficultyLabel(target.expressionCount) : "全部难度";
+        const records = this.getStudentHistoryRecords(target.student, target.className, target.expressionCount);
+        this.historyBodyEl.innerHTML = "";
+        if (!records.length) {
+          this.historySummaryEl.textContent = `${target.className} · ${target.student} · ${expressionLabel} 暂无历史记录`;
+          this.historyEmptyEl.style.display = "block";
+          return;
+        }
+        this.historyEmptyEl.style.display = "none";
+        this.historySummaryEl.textContent = `${target.className} · ${target.student} · ${expressionLabel}，共 ${records.length} 条历史记录，按完成时间从近到远展示`;
+        records.forEach((item, index) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `<td>${index + 1}</td><td>${this.escapeHtml(item.student || "未点名")}</td><td>${this.escapeHtml(item.className || "未分班")}</td><td>${this.escapeHtml(this.getDifficultyLabel(item.expressionCount))}</td><td>${this.formatClock(item.seconds || 0)}</td><td>${this.escapeHtml(item.scoreRate || 0)}%</td><td>${this.escapeHtml(item.correctCount || 0)}</td><td>${this.escapeHtml(item.status || "完成")}</td><td>${this.formatDateTime(item.finishedAt)}</td>`;
+          this.historyBodyEl.appendChild(tr);
+        });
+      }
+
+      closeHistoryModal() {
+        this.historyModalEl?.classList.remove("show");
+      }
+
+      clearLeaderboard() {
+        localStorage.removeItem(this.storageKeys.leaderboard);
+        this.populateClassOptions();
+        this.renderLeaderboard();
+        if (this.historyBodyEl) this.historyBodyEl.innerHTML = "";
+        if (this.historySummaryEl) this.historySummaryEl.textContent = "暂无历史记录";
+        if (this.historyEmptyEl) this.historyEmptyEl.style.display = "block";
+        this.showToast("历史排行榜已清空", "success");
+      }
+
+      formatDateTime(timestamp) {
+        if (!timestamp) return "-";
+        const date = new Date(timestamp);
+        const y = date.getFullYear(), m = String(date.getMonth() + 1).padStart(2, "0"), d = String(date.getDate()).padStart(2, "0"), hh = String(date.getHours()).padStart(2, "0"), mm = String(date.getMinutes()).padStart(2, "0");
+        return `${y}-${m}-${d} ${hh}:${mm}`;
+      }
+
+      escapeHtml(value) {
+        return String(value ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\"/g, "&quot;").replace(/'/g, "&#39;");
+      }
+
+      shuffleArray(array) {
+        const newArray = [...array];
+        for (let i = newArray.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+        }
+        return newArray;
+      }
+
+      clamp(value, min, max) {
+        return Math.max(min, Math.min(max, value));
+      }
+    }
+
+    function startGame() { window.game?.startGame(); }
+    function restartGame() { window.game?.restart(true); }
+    function togglePauseGame() { window.game?.togglePause(); }
+    function endGame() { window.game?.endGame(); }
+    function closeGame() { if (confirm("确定要关闭该活动吗？")) { window.close(); if (!window.closed) window.history.back(); } }
+    function drawSetupStudent() { window.game?.drawSetupStudent(); }
+    function openLeaderboardModal() { document.getElementById("leaderboardModal")?.classList.add("show"); window.game?.renderLeaderboard(); }
+    function closeLeaderboardModal() { document.getElementById("leaderboardModal")?.classList.remove("show"); }
+    function renderLeaderboard() { window.game?.renderLeaderboard(); }
+    function changeLeaderboardSort(key) { window.game?.changeLeaderboardSort(key); }
+    function closeHistoryModal() { window.game?.closeHistoryModal(); }
+    function clearLeaderboard() { if (!window.game) return; if (confirm("清空后不可恢复，确定要清空全部历史排行榜记录吗？")) window.game.clearLeaderboard(); }
+
+
+
+    function openPrdModal() {
+      const modal = document.getElementById("prdModal");
+      if (!modal) return;
+      modal.classList.add("show");
+      document.body.dataset.prdOpen = "1";
+      initializePrdNavigation();
+    }
+
+    function closePrdModal() {
+      const modal = document.getElementById("prdModal");
+      if (!modal) return;
+      modal.classList.remove("show");
+      delete document.body.dataset.prdOpen;
+    }
+
+    function initializePrdNavigation() {
+      const content = document.getElementById("prdContent");
+      const navItems = Array.from(document.querySelectorAll(".prd-nav-item[data-target]"));
+      if (!content || !navItems.length || content.dataset.bound === "1") return;
+
+      const updateActiveByScroll = () => {
+        const sections = navItems
+          .map((item) => document.getElementById(item.dataset.target))
+          .filter(Boolean);
+        let activeId = sections[0]?.id || "";
+        const topThreshold = 90;
+        sections.forEach((section) => {
+          if (section.offsetTop - content.scrollTop <= topThreshold) {
+            activeId = section.id;
+          }
+        });
+        navItems.forEach((item) => item.classList.toggle("active", item.dataset.target === activeId));
+      };
+
+      navItems.forEach((item) => {
+        item.addEventListener("click", () => {
+          const target = document.getElementById(item.dataset.target);
+          if (!target) return;
+          target.scrollIntoView({ behavior: "smooth", block: "start" });
+          navItems.forEach((btn) => btn.classList.toggle("active", btn === item));
+        });
+      });
+
+      content.addEventListener("scroll", updateActiveByScroll, { passive: true });
+      updateActiveByScroll();
+      content.dataset.bound = "1";
+    }
+
+
+    document.addEventListener("DOMContentLoaded", () => {
+      window.game = new MathBlockGame();
+      document.querySelectorAll(".modal-mask").forEach((mask) => {
+        mask.addEventListener("click", (e) => {
+          if (e.target === mask && mask.id !== "setupModal") mask.classList.remove("show");
+        });
+      });
+      document.getElementById("prdModal")?.addEventListener("click", (e) => {
+        if (e.target?.id === "prdModal") closePrdModal();
+      });
+      initializePrdNavigation();
+    });
+  </script>
+
+</body>
+</html>
