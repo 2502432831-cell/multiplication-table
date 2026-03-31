@@ -1923,7 +1923,7 @@
       <div class="victory-title">🎉 恭喜通关！</div>
       <div class="victory-stats">
         当前学生：<span id="finalStudent">未点名</span><br />
-        最终得分率：<span id="finalScoreRate">0%</span><br />
+        得分率：<span id="finalScoreRate">0%</span><br />
         用时：<span id="finalTime">0分0秒</span><br />
         正确数：<span id="finalCorrect">0</span><br />
         难度：<span id="finalExpressionCount">较易</span>
@@ -2125,9 +2125,15 @@
             <ul>
               <li>系统基于内置题库随机生成本轮算式，按所选难度截取题组。</li>
               <li>同一结果可能对应多个算式，但结果牌按结果去重，仅展示一张。</li>
-              <li>正确拖拽：算式标记为已完成，正确数 +1，算式从界面消失。</li>
-              <li>错误拖拽：播放错误反馈动画，不移除算式，允许再次尝试。</li>
-              <li>活动状态分为未开始、进行中、暂停、已完成、已结束。</li>
+              <li>正确拖拽：算式标记为已完成并提示“答对了!3x7=21”，正确数 +1，算式从界面消失。</li>
+              <li>错误拖拽：播放错误反馈动画并提示“不对哦，5x9不等于15”，不移除算式，允许再次尝试。</li>
+              <li>
+                活动状态分为未开始、进行中、暂停、已完成、已结束。
+                当用户点击“暂停活动”时提示“活动已暂停”，作答区域不可点击并附带文案“活动已暂停，点击“继续活动”继续挑战!”；当用户点击“继续活动”时活动继续并继续统计时间。
+                当用户点击“结束活动”时，记时暂停，提示“确定要结束当前活动吗?结束后本轮数据会计入排行榜。”当用户点击“确定”则结束活动，点击“取消”则记时开始并继续活动。
+                当用户点击“重新开始”时，提示“活动已重置，请重新设置后开始“。
+                当用户全部作答完毕时及时反馈“恭喜通关”，展示当前学生、最终得分率、用时、正确数、难度的信息。并支持再玩一次。
+              </li>
             </ul>
             <h4>交互逻辑</h4>
             <ul>
@@ -2904,7 +2910,7 @@
         } else {
           this.draggedElement.classList.add("wrong-drop");
           resultCard.classList.add("wrong-match");
-          this.showToast(`不对哦，${this.draggedData.expression} 不是 ${resultValue}`, "error");
+          this.showToast(`不对哦，${this.draggedData.expression} 不等于 ${resultValue}`, "error");
           setTimeout(() => {
             if (this.draggedElement) this.draggedElement.classList.remove("wrong-drop");
             resultCard.classList.remove("wrong-match");
@@ -2972,7 +2978,7 @@
         this.gameStarted = false;
         this.gamePaused = false;
         this.setGameDisabled(true);
-        this.setOverlayState(true, "本轮已完成，点击“重新开始”可重新设置挑战！");
+        this.setOverlayState(true);
         this.updateTimerDisplay();
         this.syncControlButtons();
         const record = this.createLeaderboardRecord("完成");
